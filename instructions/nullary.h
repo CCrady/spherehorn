@@ -23,6 +23,14 @@ namespace Instructions {
 
     decl(Increment);
     decl(Decrement);
+    decl(Invert);
+
+    decl(InputChar);
+    decl(InputNum);
+    decl(InputString);
+    decl(OutputChar);
+    decl(OutputNum);
+    decl(OutputString);
 }
 
 }

@@ -8,41 +8,49 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <memory>
 #include "definitions.h"
 #include "program_state.h"
 #include "arguments.h"
 #include "instructions/instructions.h"
 
-#define assert(name, var, test) \
-    if (var test) { \
-        std::cout << "  PASSED " << setw(20) << name << ":  " #var " " #test << std::endl; \
-    } else { \
-        std::cout << "! FAILED " << setw(20) << name << ":  " #var " " #test "\n" \
-                      #var " = " << var << std::endl; \
-    }
-
-#define assertAccEq(name, val) \
-    assert(name, state.accRegister, == val) \
-    if (state.condRegister != false || state.memoryPtr != nullptr) { \
-        std::cout << "! FAILED state side effects: \n" \
-                     "state.condRegister = " << state.condRegister << "\n" \
-                     "state.memoryPtr = " << state.memoryPtr << endl; \
-    }
-
 using namespace spherehorn;
 using namespace std;
+
+// real STDIN/STDOUT buffers, so that when we redirect rin/rout we can still do I/O
+istream rin (cin.rdbuf());
+ostream rout (cout.rdbuf());
 
 // test instructions that rely only on the program state, not any memory manipulation
 void testStateInstructions();
 // test the MemoryCell class
 void testMemoryCell();
+// test instructions that do I/O
+void testIOInstructions();
 
 int main() {
     testStateInstructions();
     testMemoryCell();
+    testIOInstructions();
     return 0;
 }
+
+#define assert(name, var, test) \
+    if (var test) { \
+        rout << "  PASSED " << setw(20) << name << ":  " #var " " #test << endl; \
+    } else { \
+        rout << "\u001b[91m! FAILED\u001b[0m " << setw(20) << name << ":  " #var " " #test "\n" \
+                #var " = " << var << endl; \
+    }
+
+#define assertAccEq(name, val) \
+    assert(name, state.accRegister, == val) \
+    if (state.condRegister != false || state.memoryPtr != nullptr) { \
+        rout << "!\u001b[91m! FAILED\u001b[0m   state side effects: \n" \
+                "state.condRegister = " << state.condRegister << "\n" \
+                "state.memoryPtr = " << state.memoryPtr << endl; \
+    }
 
 void resetState(ProgramState& state) {
     state.accRegister = 10;
@@ -50,12 +58,18 @@ void resetState(ProgramState& state) {
     state.memoryPtr = nullptr;
 }
 
+void resetState(ProgramState& state, MemoryCell& cell) {
+    resetState(state);
+    state.memoryPtr = &cell;
+    cell.setVal(0);
+}
+
 Arguments::Argument* createConstArg(num x) {
     return new Arguments::Constant(x);
 }
 
 void testStateInstructions() {
-    cout << "### Testing instructions relying only on program state" << endl;
+    rout << "### Testing instructions relying only on program state" << endl;
 
     ProgramState state;
 
@@ -68,6 +82,13 @@ void testStateInstructions() {
     Instructions::Decrement dec(false);
     dec.call(state);
     assertAccEq("Decrement", 9);
+
+    resetState(state);
+    Instructions::Invert inv(false);
+    inv.call(state);
+    assert("Invert", state.condRegister, == true);
+    inv.call(state);
+    assert("Invert", state.condRegister, == false);
 
     Arguments::Argument* arg;
 
@@ -121,7 +142,7 @@ void testStateInstructions() {
 }
 
 void testMemoryCell() {
-    cout << "### Testing the MemoryCell class" << endl;
+    rout << "### Testing the MemoryCell class" << endl;
 
     MemoryCell topCell (5);
     assert("getVal", topCell.getVal(), == 5);
@@ -155,3 +176,51 @@ void testMemoryCell() {
     assert("Num Children", topCell.numChildrenInstantiated, == 5);
 }
 
+void testIOInstructions() {
+    rout << "### Testing I/O instructions" << endl;
+
+    stringstream toCin;
+    cin.rdbuf(toCin.rdbuf());
+    stringstream fromCout;
+    cout.rdbuf(fromCout.rdbuf());
+
+    ProgramState state;
+    MemoryCell cell (0);
+
+    resetState(state, cell);
+    Instructions::InputChar chin(false);
+    toCin.str("AB");
+    chin.call(state);
+    assert("Input Char", cell.getVal(), == 'A');
+    assert("Input Char", cin.get(), == 'B');
+
+    fromCout.str("");
+    Instructions::OutputChar chout(false);
+    chout.call(state);
+    assert("Output Char", fromCout.str(), == "A");
+
+    resetState(state, cell);
+    Instructions::InputNum numin(false);
+    toCin.str("345\n");
+    numin.call(state);
+    assert("Input Num", cell.getVal(), == 345);
+    assert("Input Num", cin.get(), == '\n');
+
+    fromCout.str("");
+    Instructions::OutputNum numout(false);
+    numout.call(state);
+    assert("Output Num", fromCout.str(), == "345");
+
+    resetState(state, cell);
+    Instructions::InputString strin(false);
+    toCin.str("Foo Bar Baz!\nX");
+    strin.call(state);
+    assert("Input String", cell.getVal(), == 12);
+    assert("Input String", cell.getChild()->getVal(), == 'F');
+    assert("Input String", cin.get(), == 'X');
+
+    fromCout.str("");
+    Instructions::OutputString strout(false);
+    strout.call(state);
+    assert("Output String", fromCout.str(), == "Foo Bar Baz!");
+}

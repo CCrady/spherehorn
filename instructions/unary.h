@@ -13,7 +13,7 @@
 #define decl(A) \
     class A : public Unary { \
     public: A(bool _isConditional, Arguments::Argument* _arg) : Unary(_isConditional, _arg) {} \
-    protected: void action(ProgramState& state); \
+    protected: Result action(ProgramState& state); \
     }
 
 namespace spherehorn {

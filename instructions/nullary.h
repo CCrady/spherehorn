@@ -10,7 +10,7 @@
 #define decl(A) \
     class A : public Nullary { \
         public: A(bool _isConditional) : Nullary(_isConditional) {} \
-        protected: void action(ProgramState& state); \
+        protected: Result action(ProgramState& state); \
     }
 
 namespace spherehorn {

@@ -9,6 +9,19 @@ using namespace spherehorn;
 // lazy way to shorten repetitive function implementations
 #define impl(A) void Instructions::A::action(ProgramState& state)
 
+impl(SetAccumulator) {
+    state.accRegister = arg->get();
+}
+
+impl(SetConditional) {
+    state.condRegister = arg->get();
+}
+
+impl(SetMemoryVal) {
+    state.memoryPtr->setVal(arg->get());
+}
+
+
 impl(Add) {
     state.accRegister += arg->get();
 }
@@ -39,6 +52,19 @@ impl(Modulo) {
 
 impl(ReverseModulo) {
     state.accRegister = arg->get() % state.accRegister;
+}
+
+
+impl(And) {
+    state.condRegister = state.condRegister && arg->get();
+}
+
+impl(Or) {
+    state.condRegister = state.condRegister || arg->get();
+}
+
+impl(Xor) {
+    state.condRegister = state.condRegister != !!arg->get();
 }
 
 #undef impl

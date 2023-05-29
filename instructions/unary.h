@@ -28,6 +28,10 @@ namespace Instructions {
             arg(_arg) {}
     };
 
+    decl(SetAccumulator);
+    decl(SetConditional);
+    decl(SetMemoryVal);
+
     decl(Add);
     decl(Subtract);
     decl(ReverseSubtract);
@@ -36,6 +40,10 @@ namespace Instructions {
     decl(ReverseDivide);
     decl(Modulo);
     decl(ReverseModulo);
+
+    decl(And);
+    decl(Or);
+    decl(Xor);
 }
 
 }

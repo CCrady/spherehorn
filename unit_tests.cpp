@@ -18,20 +18,19 @@
 using namespace spherehorn;
 using namespace std;
 
-// real STDIN/STDOUT buffers, so that when we redirect rin/rout we can still do I/O
+// real STDIN/STDOUT buffers, so that when we redirect cin/cout we can still do I/O
 istream rin (cin.rdbuf());
 ostream rout (cout.rdbuf());
 
-// test instructions that rely only on the program state, not any memory manipulation
-void testStateInstructions();
-// test the MemoryCell class
+void testMathInstructions();
 void testMemoryCell();
-// test instructions that do I/O
+void testSetterInstructions();
 void testIOInstructions();
 
 int main() {
-    testStateInstructions();
+    testMathInstructions();
     testMemoryCell();
+    testSetterInstructions();
     testIOInstructions();
     return 0;
 }
@@ -52,6 +51,14 @@ int main() {
                 "state.memoryPtr = " << state.memoryPtr << endl; \
     }
 
+#define assertCondEq(name, val) \
+    assert(name, state.condRegister, == val) \
+    if (state.accRegister != 10 || state.memoryPtr != nullptr) { \
+        rout << "!\u001b[91m! FAILED\u001b[0m   state side effects: \n" \
+                "state.accRegister = " << state.accRegister << "\n" \
+                "state.memoryPtr = " << state.memoryPtr << endl; \
+    }
+
 void resetState(ProgramState& state) {
     state.accRegister = 10;
     state.condRegister = false;
@@ -68,8 +75,8 @@ Arguments::Argument* createConstArg(num x) {
     return new Arguments::Constant(x);
 }
 
-void testStateInstructions() {
-    rout << "### Testing instructions relying only on program state" << endl;
+void testMathInstructions() {
+    rout << "### Testing math instructions" << endl;
 
     ProgramState state;
 
@@ -86,9 +93,9 @@ void testStateInstructions() {
     resetState(state);
     Instructions::Invert inv(false);
     inv.call(state);
-    assert("Invert", state.condRegister, == true);
+    assertCondEq("Invert", true);
     inv.call(state);
-    assert("Invert", state.condRegister, == false);
+    assertCondEq("Invert", false);
 
     Arguments::Argument* arg;
 
@@ -139,6 +146,35 @@ void testStateInstructions() {
     Instructions::ReverseModulo rmod(false, arg);
     rmod.call(state);
     assertAccEq("Reverse Modulo", 6);
+
+    resetState(state);
+    state.condRegister = true;
+    arg = createConstArg(3);
+    Instructions::And and1(false, arg);
+    and1.call(state);
+    assertCondEq("And", true);
+    arg = createConstArg(0);
+    Instructions::And and2(false, arg);
+    and2.call(state);
+    assertCondEq("And", false);
+
+    resetState(state);
+    arg = createConstArg(0);
+    Instructions::Or or1(false, arg);
+    or1.call(state);
+    assertCondEq("Or", false);
+    arg = createConstArg(3);
+    Instructions::Or or2(false, arg);
+    or2.call(state);
+    assertCondEq("Or", true);
+
+    resetState(state);
+    arg = createConstArg(1);
+    Instructions::Xor xor1(false, arg);
+    xor1.call(state);
+    assertCondEq("Xor", true);
+    xor1.call(state);
+    assertCondEq("Xor", false);
 }
 
 void testMemoryCell() {
@@ -174,6 +210,36 @@ void testMemoryCell() {
         cellptr = cellptr->getNext();
     }
     assert("Num Children", topCell.numChildrenInstantiated, == 5);
+}
+
+void testSetterInstructions() {
+    rout << "### Testing setter instructions" << endl;
+
+    ProgramState state;
+    Arguments::Argument* arg;
+
+    resetState(state);
+    arg = createConstArg(3);
+    Instructions::SetAccumulator setacc(false, arg);
+    setacc.call(state);
+    assertAccEq("Set Accumulator", 3);
+
+    resetState(state);
+    arg = createConstArg(3);
+    Instructions::SetConditional setcond(false, arg);
+    setcond.call(state);
+    assertCondEq("Set Conditional", true);
+
+    resetState(state);
+    arg = createConstArg(3);
+    MemoryCell cell(1);
+    state.memoryPtr = &cell;
+    Instructions::SetMemoryVal setval(false, arg);
+    setval.call(state);
+    assert("Set Memory Value", cell.getVal(), == 3);
+    cell.getChild();
+    setval.call(state);
+    assert("Set Memory Value", cell.numChildrenInstantiated, == 0);
 }
 
 void testIOInstructions() {

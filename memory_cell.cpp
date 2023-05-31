@@ -1,8 +1,21 @@
 // memory_cell.cpp
 
+#include <string>
 #include "definitions.h"
 #include "memory_cell.h"
 using namespace spherehorn;
+using std::string;
+
+
+MemoryCell::MemoryCell(const string& str) : value(str.size()) {
+    if (str.size() == 0) return;
+
+    MemoryCell* currChild = getChild();
+    for (unsigned int i = 0; i < str.size(); i++) {
+        currChild->setVal(str.at(i));
+        currChild = currChild->getNext();
+    }
+}
 
 MemoryCell::~MemoryCell() {
     reset();
@@ -137,6 +150,23 @@ MemoryCell* MemoryCell::shiftForward(num n) {
         curr = curr->getNext();
     }
     return curr;
+}
+
+MemoryCell* MemoryCell::insertBefore(num _value) {
+    MemoryCell* newCell = new MemoryCell(_value);
+    MemoryCell* prevCell = getPrev();
+    prevCell->nextSibling = newCell;
+    this->prevSibling = newCell;
+    newCell->nextSibling = this;
+    newCell->prevSibling = prevCell;
+    parent->value++; // TODO: what if this is a top-level memory cell, i.e. parent = null?
+    return newCell;
+}
+
+MemoryCell* MemoryCell::insertAfter(num _value) {
+    MemoryCell* nextCell = getNext();
+    MemoryCell* newCell = nextCell->insertBefore(_value);
+    return newCell;
 }
 
 bool MemoryCell::isTop() {

@@ -131,6 +131,39 @@ void testMemoryCell() {
     }
     assert(topCell.numChildrenInstantiated, == 5);
 
+    name = "Shift multiple positions";
+    assert(childCell->shiftBack(5), == childCell);
+    assert(childCell->shiftForward(10), == childCell);
+    assert(childCell->shiftBack(6), == childCell->getPrev());
+    assert(childCell->shiftBack(4), == childCell->getNext());
+    assert(childCell->shiftForward(2), == childCell->getNext()->getNext());
+
+    name = "Insert";
+    MemoryCell insertParent (5);
+    MemoryCell& firstChild = *insertParent.getChild();
+    MemoryCell& prevChild = *firstChild.getPrev();
+    MemoryCell& newPrevChild = *firstChild.insertBefore(3);
+    assert(insertParent.getVal(), == 6);
+    assert(newPrevChild.getVal(), == 3);
+    assert(firstChild.getPrev(), == &newPrevChild);
+    assert(newPrevChild.getNext(), == &firstChild);
+    assert(newPrevChild.getPrev(), == &prevChild);
+    assert(prevChild.getNext(), == &newPrevChild);
+    MemoryCell& newNextChild = *firstChild.insertAfter();
+    assert(firstChild.getNext(), == &newNextChild);
+    assert(newNextChild.getPrev(), == &firstChild);
+
+    name = "Constructor from string";
+    string fromStr = "ABC";
+    MemoryCell cellABC = MemoryCell(fromStr);
+    assert(cellABC.getVal(), == 3);
+    MemoryCell* childA = cellABC.getChild();
+    assert(childA->getVal(), == 'A');
+    MemoryCell* childB = childA->getNext();
+    assert(childB->getVal(), == 'B');
+    MemoryCell* childC = childB->getNext();
+    assert(childC->getVal(), == 'C');
+
     endGroup();
 }
 

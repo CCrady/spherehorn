@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string>
 #include "definitions.h"
 
 namespace spherehorn {
@@ -18,7 +19,9 @@ private:
     bool isFull() { return numChildrenInstantiated == value; }
 
 public:
-    MemoryCell(num _value) : value(_value) {}
+    MemoryCell(num _value = 0) : value(_value) {}
+    // Construct a memory cell whose contents are the string
+    MemoryCell(const std::string& str);
     ~MemoryCell();
     num getVal();
     void setVal(num _value);
@@ -29,6 +32,10 @@ public:
     MemoryCell* getParent();
     MemoryCell* shiftBack(num n);
     MemoryCell* shiftForward(num n);
+    // Construct a new memory cell with the given value and insert it just before/after this cell.
+    // Return a pointer to the new cell.
+    MemoryCell* insertBefore(num _value = 0);
+    MemoryCell* insertAfter(num _value = 0);
     bool isTop();
 };
 

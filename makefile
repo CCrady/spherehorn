@@ -3,17 +3,16 @@ CXX := g++
 CXXFLAGS := -g3 -Wall -Wextra
 
 OBJECTS := arguments.o program_state.o memory_cell.o instructions/nullary.o instructions/unary.o
-EXECUTABLES := unit_tests spherehorn
+EXECUTABLES := unit_tests/unit_tests.exe spherehorn.exe
 
 # Primary commands:
-build: spherehorn ;
+build: spherehorn.exe ;
 
-test: unit_tests
-	./unit_tests
+test: unit_tests/unit_tests.exe
+	./unit_tests/unit_tests.exe
 
 clean:
-	rm $(OBJECTS)
-	rm $(EXECUTABLES)
+	rm $(OBJECTS) $(EXECUTABLES) 2> /dev/null || true
 
 .PHONY: build test clean
 
@@ -21,6 +20,6 @@ clean:
 $(OBJECTS): %.o: %.cpp
 
 # Compile and link all executables
-$(EXECUTABLES): %: %.cpp $(OBJECTS)
+$(EXECUTABLES): %.exe: %.cpp $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) $< -o $@
 

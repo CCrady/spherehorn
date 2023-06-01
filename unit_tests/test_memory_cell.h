@@ -58,7 +58,7 @@ void testMemoryCell() {
     assert(childCell->shiftBack(4), == childCell->getNext());
     assert(childCell->shiftForward(2), == childCell->getNext()->getNext());
 
-    name = "Insert";
+    name = "Insert before/after";
     MemoryCell insertParent (5);
     MemoryCell& firstChild = *insertParent.getChild();
     MemoryCell& prevChild = *firstChild.getPrev();
@@ -83,6 +83,33 @@ void testMemoryCell() {
     assert(childB->getVal(), == 'B');
     MemoryCell* childC = childB->getNext();
     assert(childC->getVal(), == 'C');
+
+    name = "Insert child";
+    MemoryCell* insertionParent = new MemoryCell(0);
+    MemoryCell* child1 = new MemoryCell(1);
+    MemoryCell* child2 = new MemoryCell(2);
+    MemoryCell* child3 = new MemoryCell(3);
+    insertionParent->insertChild(child1);
+    assert(insertionParent->getVal(), == 1);
+    assert(insertionParent->getChild(), == child1);
+    assert(child1->getParent(), == insertionParent);
+    assert(child1->getNext(), == child1);
+    assert(child1->getPrev(), == child1);
+    insertionParent->insertChild(child2);
+    assert(insertionParent->getVal(), == 2);
+    assert(insertionParent->getChild(), == child1);
+    assert(child2->getParent(), == insertionParent);
+    assert(child1->getNext(), == child2);
+    assert(child1->getPrev(), == child2);
+    assert(child2->getNext(), == child1);
+    assert(child2->getPrev(), == child1);
+    insertionParent->insertChild(child3);
+    assert(insertionParent->getVal(), == 3);
+    assert(child1->getPrev(), == child3);
+    assert(child3->getNext(), == child1);
+    assert(child3->getPrev(), == child2);
+    assert(child2->getNext(), == child3);
+    delete insertionParent;
 
     endGroup();
 }

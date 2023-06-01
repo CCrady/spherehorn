@@ -36,6 +36,8 @@ public:
     // Return a pointer to the new cell.
     MemoryCell* insertBefore(num _value = 0);
     MemoryCell* insertAfter(num _value = 0);
+    // Insert child as the last child of this memory cell
+    void insertChild(MemoryCell* child);
     bool isTop();
 };
 

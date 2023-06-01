@@ -160,6 +160,7 @@ MemoryCell* MemoryCell::insertBefore(num _value) {
     newCell->nextSibling = this;
     newCell->prevSibling = prevCell;
     parent->value++; // TODO: what if this is a top-level memory cell, i.e. parent = null?
+    parent->numChildrenInstantiated++;
     return newCell;
 }
 
@@ -167,6 +168,26 @@ MemoryCell* MemoryCell::insertAfter(num _value) {
     MemoryCell* nextCell = getNext();
     MemoryCell* newCell = nextCell->insertBefore(_value);
     return newCell;
+}
+
+void MemoryCell::insertChild(MemoryCell* newChild) {
+    if (value == 0) {
+        this->firstChild = newChild;
+        newChild->parent = this;
+        newChild->nextSibling = newChild;
+        newChild->prevSibling = newChild;
+        value = 1;
+        numChildrenInstantiated = 1;
+    } else {
+        newChild->parent = this;
+        MemoryCell* lastChild = firstChild->getPrev();
+        lastChild->nextSibling = newChild;
+        newChild->prevSibling = lastChild;
+        firstChild->prevSibling = newChild;
+        newChild->nextSibling = firstChild;
+        value++;
+        numChildrenInstantiated++;
+    }
 }
 
 bool MemoryCell::isTop() {

@@ -11,20 +11,20 @@
 
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
-    class A : public Unary { \
-    public: A(bool _isConditional, Arguments::Argument* _arg) : Unary(_isConditional, _arg) {} \
-    protected: Result action(ProgramState& state); \
+    class A : public UnaryInstruction { \
+    public: A(bool _isConditional, Arguments::Argument* _arg) : UnaryInstruction(_isConditional, _arg) {} \
+    protected: Status action(ProgramState& state); \
     }
 
 namespace spherehorn {
 
 namespace Instructions {
-    class Unary : public ActiveInstruction {
+    class UnaryInstruction : public Instruction {
     protected:
         std::unique_ptr<Arguments::Argument> arg;
     public:
-        Unary(bool _isConditional, Arguments::Argument* _arg) : // TODO: pass a unique_ptr instead of a raw pointer
-            ActiveInstruction(_isConditional),
+        UnaryInstruction(bool _isConditional, Arguments::Argument* _arg) : // TODO: pass a unique_ptr instead of a raw pointer
+            Instruction(_isConditional),
             arg(_arg) {}
     };
 

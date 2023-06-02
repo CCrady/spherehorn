@@ -19,14 +19,14 @@ void testSetterInstructions() {
     resetState(state);
     arg = createConstArg(3);
     Instructions::SetAccumulator setacc(false, arg);
-    setacc.call(state);
+    setacc.run(state);
     assertAccEq(3);
 
     name = "Set Conditional";
     resetState(state);
     arg = createConstArg(3);
     Instructions::SetConditional setcond(false, arg);
-    setcond.call(state);
+    setcond.run(state);
     assertCondEq(true);
 
     name = "Set Memory Value";
@@ -35,10 +35,10 @@ void testSetterInstructions() {
     MemoryCell cell(1);
     state.memoryPtr = &cell;
     Instructions::SetMemoryVal setval(false, arg);
-    setval.call(state);
+    setval.run(state);
     assert(cell.getVal(), == 3);
     cell.getChild();
-    setval.call(state);
+    setval.run(state);
     assert(cell.numChildrenInstantiated, == 0);
 
     endGroup();

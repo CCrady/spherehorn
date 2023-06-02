@@ -3,23 +3,20 @@
 #pragma once
 
 #include "../definitions.h"
-#include "instruction.h"
 #include "../program_state.h"
+#include "instruction.h"
 
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
-    class A : public Nullary { \
-        public: A(bool _isConditional) : Nullary(_isConditional) {} \
-        protected: Result action(ProgramState& state); \
+    class A : public Instruction { \
+        public: A(bool _isConditional) : Instruction(_isConditional) {} \
+        protected: Status action(ProgramState& state); \
     }
 
 namespace spherehorn {
 
 namespace Instructions {
-    class Nullary : public ActiveInstruction {
-    public:
-        Nullary(bool _isConditional) : ActiveInstruction(_isConditional) {}
-    };
+    decl(Break);
 
     decl(Increment);
     decl(Decrement);

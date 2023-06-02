@@ -9,24 +9,31 @@
 
 using namespace spherehorn;
 using std::string;
-using Instructions::Result;
 // lazy way to shorten repetitive function implementations
-#define impl(A) Result Instructions::A::action(ProgramState& state)
+#define impl(A) Status Instructions::A::action(ProgramState& state)
+
+impl(Break) {
+    return Status::BREAK;
+}
+
 
 impl(Increment) {
     state.accRegister++;
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(Decrement) {
-    if (state.accRegister == 0) return ABORT;
+    if (state.accRegister == 0) {
+        std::cerr << "Error: Attempted decrement past zero" << std::endl;
+        return Status::ABORT;
+    }
     state.accRegister--;
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(Invert) {
     state.condRegister = !state.condRegister;
-    return OKAY;
+    return Status::OKAY;
 }
 
 
@@ -34,14 +41,14 @@ impl(InputChar) {
     unsigned char inChar = 0;
     std::cin >> inChar;
     state.memoryPtr->setVal(inChar);
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(InputNum) {
     num inNum = 0;
     std::cin >> inNum;
     state.memoryPtr->setVal(inNum);
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(InputString) {
@@ -54,21 +61,24 @@ impl(InputString) {
         currChild->setVal(*it);
         currChild = currChild->getNext();
     }
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(OutputChar) {
     num outNum = state.memoryPtr->getVal();
     // the given character needs to be ASCII
-    if (outNum > UCHAR_MAX) return ABORT;
+    if (outNum > UCHAR_MAX) {
+        std::cerr << "Error: Attempted chout of invalid character ( #" << outNum << " )" << std::endl;
+        return Status::ABORT;
+    }
     std::cout << (unsigned char) outNum;
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(OutputNum) {
     num outNum = state.memoryPtr->getVal();
     std::cout << outNum;
-    return OKAY;
+    return Status::OKAY;
 }
 
 impl(OutputString) {
@@ -78,7 +88,7 @@ impl(OutputString) {
         std::cout << (unsigned char) currChild->getVal();
         currChild = currChild->getNext();
     }
-    return OKAY;
+    return Status::OKAY;
 }
 
 #undef impl

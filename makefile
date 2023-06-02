@@ -2,7 +2,7 @@
 CXX := g++
 CXXFLAGS := -g3 -Wall -Wextra
 
-OBJECTS := arguments.o program_state.o memory_cell.o instructions/nullary.o instructions/unary.o
+OBJECTS := arguments.o program_state.o memory_cell.o instruction_block.o instructions/nullary.o instructions/unary.o
 EXECUTABLES := unit_tests/unit_tests.exe spherehorn.exe
 
 # Primary commands:

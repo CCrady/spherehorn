@@ -8,6 +8,7 @@
 #include "../program_state.h"
 #include "../memory_cell.h"
 #include "../arguments.h"
+#include "../instruction_container.h"
 using namespace spherehorn;
 using namespace std;
 
@@ -69,6 +70,14 @@ Arguments::Argument* createConstArg(num x) {
     } \
     }
 
+#define assertOkay(instr) \
+    assert(instr.run(state), == spherehorn::Status::OKAY); \
+    assert(fromCerr.str(), == "");
+
+#define assertAbort(instr) \
+    assert(instr.run(state), == spherehorn::Status::ABORT); \
+    assert(fromCerr.str(), != "");
+
 #define assertAccEq(val) \
     assert(state.accRegister, == val) \
     if (state.condRegister != false || state.memoryPtr != nullptr) { \
@@ -85,12 +94,23 @@ Arguments::Argument* createConstArg(num x) {
                 "  > state.memoryPtr = " << state.memoryPtr << endl; \
     }
 
-#define assertAbort(instr) \
-    assert(instr.call(state), == nullptr); \
-    assert(fromCerr.str(), != "");
-
 #define endGroup() \
     rout << "Passed " \
          << (numPassed == numTests ? "\u001b[92m" : "\u001b[91m") << numPassed << "/" << numTests \
          << "\u001b[0m tests" << endl;
+
+std::ostream& operator <<(std::ostream& out, spherehorn::Status status) {
+    switch (status) {
+    case spherehorn::Status::OKAY:
+        out << "Status::OKAY";
+        break;
+    case spherehorn::Status::BREAK:
+        out << "Status::BREAK";
+        break;
+    case spherehorn::Status::ABORT:
+        out << "Status::ABORT";
+        break;
+    }
+    return out;
+}
 

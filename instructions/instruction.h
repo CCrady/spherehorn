@@ -2,76 +2,41 @@
 
 /* Class hierarchy:
 
-  Instruction
-   /       \
-Break     ActiveInstruction
-           /             \
-      Nullary           Unary
+InstructionContainer
+         |
+    Instruction
+     /|\     \
+     ...    UnaryInstruction
+                  /|\
+                  ...
 
-Individual isntruction classes branch off of Nullary and Unary.
+Individual isntruction classes branch off of Instruction (for nullary instructions) and
+UnaryInstruction (for unary instructions).
 */
-
 
 #pragma once
 
 #include <iostream>
 #include "../definitions.h"
 #include "../program_state.h"
+#include "../instruction_container.h"
 
 namespace spherehorn {
 
 namespace Instructions {
-    class Instruction {
+    class Instruction : public InstructionContainer {
     protected:
         bool isConditional = false;
-        Instruction* nextInstr = nullptr;
+        // .action() is overloaded by subclasses to implement their individual behaviors
+        virtual Status action(ProgramState& state) = 0;
     public:
         Instruction(bool _isConditional) : isConditional(_isConditional) {}
-        void setNextInstr(Instruction* _nextInstr) { nextInstr = _nextInstr; } // TODO: use smart pointers
-        virtual Instruction* call(ProgramState& state) = 0;
-    };
-
-    class Break : public Instruction {
-    private:
-        Instruction* breakInstr;
-    public:
-        Break(bool _isConditional) : Instruction(_isConditional) {}
-        void setBreakInstr(Instruction* _breakInstr) { breakInstr = _breakInstr; } // TODO: use smart pointers
-
-        Instruction* call(ProgramState& state) {
-            if (isConditional && !state.condRegister) return nextInstr;
-            return breakInstr;
-        }
-    };
-
-    // the value returned by a call to .action(), indicating whether the instruction call went
-    // okay, terminated the program gracefully, or encountered an error.
-    enum Result {
-        OKAY,
-        EXIT,
-        ABORT,
-    };
-
-    class ActiveInstruction : public Instruction {
-    protected:
-        virtual Result action(ProgramState& state) = 0;
-    public:
-        ActiveInstruction(bool _isConditional) : Instruction(_isConditional) {}
-        // Call/run the instruction, modifying the program's state. Return a pointer to the next
-        // instruction to be executed.
-        Instruction* call(ProgramState& state) {
-            if (isConditional && !state.condRegister) return nextInstr;
-
-            Result result = action(state);
-            switch (result) {
-            case ABORT:
-                std::cerr << "Error!" << std::endl; // TODO: make a more informative error message
-                [[fallthrough]];
-            case EXIT:
-                return nullptr;
-            default:
-                return nextInstr;
-            }
+        // Run the instruction's overloaded .action() method, or simply do nothing if the
+        // instruction shouldn't execute because of a conditional. Overload from
+        // InstructionContainer.
+        Status run(ProgramState& state) {
+            if (isConditional && !state.condRegister) return Status::OKAY;
+            return action(state);
         }
     };
 }

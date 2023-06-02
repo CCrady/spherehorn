@@ -23,7 +23,7 @@ class InstructionBlock : public InstructionContainer {
 private:
     std::vector<std::unique_ptr<InstructionContainer>> instrs;
 public:
-    void insertInstr(std::unique_ptr<InstructionContainer> instr) {
+    void insertInstr(std::unique_ptr<InstructionContainer>& instr) {
         instrs.push_back(std::move(instr));
     }
     // execute each instruction in instrs in a loop until we break out

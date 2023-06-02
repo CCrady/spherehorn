@@ -4,6 +4,7 @@
 #include "test_math.h"
 #include "test_setters.h"
 #include "test_io.h"
+#include "test_control_flow.h"
 #include "unit_tests.h"
 
 
@@ -13,6 +14,7 @@ int main() {
     testMathInstructions();
     testSetterInstructions();
     testIOInstructions();
+    testControlFlow();
     return 0;
 }
 

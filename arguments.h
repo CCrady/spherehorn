@@ -9,8 +9,11 @@ namespace spherehorn {
 
 namespace Arguments {
     class Argument {
+    protected:
+        static ProgramState* state;
     public:
         virtual num get() = 0;
+        static void setStatePtr(ProgramState* _state) { state = _state; }
     };
 
     class Constant : public Argument {
@@ -22,18 +25,14 @@ namespace Arguments {
     };
 
     class Accumulator : public Argument {
-    private:
-        ProgramState* state;
     public:
-        Accumulator(ProgramState* _state) : state(_state) {}
+        Accumulator() {}
         num get();
     };
 
     class MemoryCell : public Argument {
-    private:
-        ProgramState* state;
     public:
-        MemoryCell(ProgramState* _state) : state(_state) {}
+        MemoryCell() {}
         num get();
     };
 }

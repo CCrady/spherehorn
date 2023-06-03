@@ -4,6 +4,9 @@
 #include "arguments.h"
 using namespace spherehorn;
 
+
+ProgramState* Arguments::Argument::state = nullptr; // TODO: is this the right way to initialize a static variable?
+
 num Arguments::Constant::get() {
     return value;
 }
@@ -12,8 +15,7 @@ num Arguments::Accumulator::get() {
     return state->accRegister;
 }
 
-/* // TODO: implement this
 num Arguments::MemoryCell::get() {
-    return state->
+    return state->memoryPtr->getVal();
 }
-*/
+

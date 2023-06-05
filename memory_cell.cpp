@@ -37,6 +37,12 @@ void MemoryCell::reset() {
     numChildrenInstantiated = 0;
     // if this cell has no children, then we don't need to do anything
     if (firstChild == nullptr) return;
+    // if this cell has a single child, then destroy it and return
+    if (value == 1) {
+        delete firstChild;
+        firstChild = nullptr;
+        return;
+    }
     // otherwise, destroy all of this node's instantiated children
 
     // split up the link from the last child to the first child, if it exists
@@ -72,6 +78,11 @@ MemoryCell* MemoryCell::getChild() {
     firstChild = new MemoryCell(0);
     firstChild->parent = this;
     numChildrenInstantiated = 1;
+    // if we're only going to have a single child, then link that child to itself in a loop
+    if (value == 1) {
+        firstChild->prevSibling = firstChild;
+        firstChild->nextSibling = firstChild;
+    }
     return firstChild;
 }
 
@@ -134,7 +145,7 @@ MemoryCell* MemoryCell::getParent() {
 MemoryCell* MemoryCell::shiftBack(num n) {
     // if n is larger than the size of the loop, we can accomplish the same thing in less than n
     // calls to getPrev()
-    num numOps = n % parent->value; // TODO: what if this is a top-level memory cell, i.e. parent = null?
+    num numOps = n % parent->value;
     MemoryCell* curr = this;
     for (num i = 0; i < numOps; i++) {
         curr = curr->getPrev();
@@ -144,7 +155,7 @@ MemoryCell* MemoryCell::shiftBack(num n) {
 
 MemoryCell* MemoryCell::shiftForward(num n) {
     // see MemoryCell::shiftBack(num n) for an explanation of how this works
-    num numOps = n % parent->value; // TODO
+    num numOps = n % parent->value;
     MemoryCell* curr = this;
     for (num i = 0; i < numOps; i++) {
         curr = curr->getNext();
@@ -159,7 +170,8 @@ MemoryCell* MemoryCell::insertBefore(num _value) {
     this->prevSibling = newCell;
     newCell->nextSibling = this;
     newCell->prevSibling = prevCell;
-    parent->value++; // TODO: what if this is a top-level memory cell, i.e. parent = null?
+    // make sure to update the parent
+    parent->value++;
     parent->numChildrenInstantiated++;
     return newCell;
 }
@@ -176,8 +188,6 @@ void MemoryCell::insertChild(MemoryCell* newChild) {
         newChild->parent = this;
         newChild->nextSibling = newChild;
         newChild->prevSibling = newChild;
-        value = 1;
-        numChildrenInstantiated = 1;
     } else {
         newChild->parent = this;
         MemoryCell* lastChild = firstChild->getPrev();
@@ -185,9 +195,9 @@ void MemoryCell::insertChild(MemoryCell* newChild) {
         newChild->prevSibling = lastChild;
         firstChild->prevSibling = newChild;
         newChild->nextSibling = firstChild;
-        value++;
-        numChildrenInstantiated++;
     }
+    value++;
+    numChildrenInstantiated++;
 }
 
 bool MemoryCell::isTop() {

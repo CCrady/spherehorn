@@ -44,6 +44,9 @@ namespace Instructions {
     decl(And);
     decl(Or);
     decl(Xor);
+
+    decl(MemoryBack);
+    decl(MemoryForward);
 }
 
 }

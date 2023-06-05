@@ -118,4 +118,15 @@ impl(Xor) {
     return Status::OKAY;
 }
 
+
+impl(MemoryBack) {
+    state.memoryPtr = state.memoryPtr->shiftBack(arg->get());
+    return Status::OKAY;
+}
+
+impl(MemoryForward) {
+    state.memoryPtr = state.memoryPtr->shiftForward(arg->get());
+    return Status::OKAY;
+}
+
 #undef impl

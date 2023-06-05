@@ -68,6 +68,10 @@ Arguments::Argument* createConstArg(num x) {
     assert(instr.run(state), == spherehorn::Status::OKAY); \
     assert(fromCerr.str(), == "");
 
+#define assertExit(instr) \
+    assert(instr.run(state), == spherehorn::Status::EXIT); \
+    assert(fromCerr.str(), == "");
+
 #define assertAbort(instr) \
     assert(instr.run(state), == spherehorn::Status::ABORT); \
     assert(fromCerr.str(), != "");

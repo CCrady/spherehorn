@@ -91,4 +91,35 @@ impl(OutputString) {
     return Status::OKAY;
 }
 
+
+impl(MemoryUp) {
+    MemoryCell* parent = state.memoryPtr->getParent();
+    state.memoryPtr = parent;
+    // if we've exited the memory tree, the program should exit
+    if (parent->isTop()) {
+        return Status::EXIT;
+    } else {
+        return Status::OKAY;
+    }
+}
+
+impl(MemoryDown) {
+    if (state.memoryPtr->getVal() == 0) {
+        std::cerr << "Error: Attempted to enter child of cell with value 0" << std::endl;
+        return Status::ABORT;
+    }
+    state.memoryPtr = state.memoryPtr->getChild();
+    return Status::OKAY;
+}
+
+impl(MemoryPrev) {
+    state.memoryPtr = state.memoryPtr->getPrev();
+    return Status::OKAY;
+}
+
+impl(MemoryNext) {
+    state.memoryPtr = state.memoryPtr->getNext();
+    return Status::OKAY;
+}
+
 #undef impl

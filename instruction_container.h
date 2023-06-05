@@ -18,10 +18,11 @@ Various instruction types branch off of Instruction.
 namespace spherehorn {
 
 // The value returned by a call to .run(), indicating whether to continue execution as normal, break
-// out of the current loop, or abort termination.
+// out of the current loop, exit the program gracefully, or abort termination with an error message.
 enum struct Status {
     OKAY,
     BREAK,
+    EXIT,
     ABORT,
 };
 

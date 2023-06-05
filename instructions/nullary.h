@@ -28,6 +28,11 @@ namespace Instructions {
     decl(OutputChar);
     decl(OutputNum);
     decl(OutputString);
+
+    decl(MemoryUp);
+    decl(MemoryDown);
+    decl(MemoryPrev);
+    decl(MemoryNext);
 }
 
 }

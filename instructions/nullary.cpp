@@ -10,7 +10,7 @@
 using namespace spherehorn;
 using std::string;
 // lazy way to shorten repetitive function implementations
-#define impl(A) Status Instructions::A::action(ProgramState& state)
+#define impl(A) Status Instructions::A::action([[maybe_unused]] ProgramState& state)
 
 impl(Break) {
     return Status::BREAK;

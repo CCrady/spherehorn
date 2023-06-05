@@ -105,6 +105,9 @@ std::ostream& operator <<(std::ostream& out, spherehorn::Status status) {
     case spherehorn::Status::BREAK:
         out << "Status::BREAK";
         break;
+    case spherehorn::Status::EXIT:
+        out << "Status::EXIT";
+        break;
     case spherehorn::Status::ABORT:
         out << "Status::ABORT";
         break;

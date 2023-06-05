@@ -8,7 +8,7 @@
 
 using namespace spherehorn;
 // lazy way to shorten repetitive function implementations
-#define impl(A) Status Instructions::A::action(ProgramState& state)
+#define impl(A) Status Instructions::A::action([[maybe_unused]] ProgramState& state)
 
 impl(SetAccumulator) {
     state.accRegister = arg->get();

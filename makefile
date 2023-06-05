@@ -2,11 +2,10 @@
 CXX := g++
 CXXFLAGS := -g3 -Wall -Wextra
 
-OBJECTS := arguments.o program_state.o memory_cell.o instruction_block.o instructions/nullary.o instructions/unary.o
-EXECUTABLES := unit_tests/unit_tests.exe spherehorn.exe
+OBJECTS := arguments.o memory_cell.o instruction_block.o instructions/nullary.o instructions/unary.o
 
 # Primary commands:
-build: spherehorn.exe ;
+#build: spherehorn.exe ;
 
 test: unit_tests/unit_tests.exe
 	./unit_tests/unit_tests.exe
@@ -19,7 +18,9 @@ clean:
 # Compile all object files
 $(OBJECTS): %.o: %.cpp
 
-# Compile and link all executables
-$(EXECUTABLES): %.exe: %.cpp $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) $< -o $@
+# Compile and link the executables
+
+TESTS := $(wildcard unit_tests/*)
+unit_tests/unit_tests.exe: $(OBJECTS) $(TESTS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) unit_tests/unit_tests.cpp -o $@
 

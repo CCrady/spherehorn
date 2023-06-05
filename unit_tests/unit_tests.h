@@ -13,12 +13,6 @@ using namespace spherehorn;
 using namespace std;
 
 
-// these will be defined by the various test_*.h files
-void testMemoryCell();
-void testMathInstructions();
-void testSetterInstructions();
-void testIOInstructions();
-
 // real STDIN/STDOUT buffers, so that when we redirect cin/cout we can still do I/O
 istream rin (cin.rdbuf());
 ostream rout (cout.rdbuf());
@@ -111,6 +105,15 @@ std::ostream& operator <<(std::ostream& out, spherehorn::Status status) {
         out << "Status::ABORT";
         break;
     }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const spherehorn::ProgramState& state) {
+    out << "ProgramState @ " << &state << " {\n"
+           "    accRegister = " << state.accRegister << "\n"
+           "    condRegister = " << state.condRegister << "\n"
+           "    memoryPtr = " << state.memoryPtr << "\n"
+           "}" << std::endl;
     return out;
 }
 

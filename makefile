@@ -2,7 +2,7 @@
 CXX := g++
 CXXFLAGS := -g3 -Wall -Wextra
 
-OBJECTS := arguments.o memory_cell.o instruction_block.o instructions/nullary.o instructions/unary.o
+OBJECTS := arguments.o memory_cell.o tokenizer.o instruction_block.o instructions/nullary.o instructions/unary.o
 
 # Primary commands:
 #build: spherehorn.exe ;

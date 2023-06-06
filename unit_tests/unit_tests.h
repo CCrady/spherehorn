@@ -9,6 +9,7 @@
 #include "../memory_cell.h"
 #include "../arguments.h"
 #include "../instruction_container.h"
+#include "../tokenizer.h"
 using namespace spherehorn;
 using namespace std;
 
@@ -97,23 +98,39 @@ Arguments::Argument* createConstArg(num x) {
          << (numPassed == numTests ? "\u001b[92m" : "\u001b[91m") << numPassed << "/" << numTests \
          << "\u001b[0m tests" << endl;
 
+#define printEnumCase(val) \
+    case spherehorn::val: \
+        out << #val; \
+        break;
+
 std::ostream& operator <<(std::ostream& out, spherehorn::Status status) {
     switch (status) {
-    case spherehorn::Status::OKAY:
-        out << "Status::OKAY";
-        break;
-    case spherehorn::Status::BREAK:
-        out << "Status::BREAK";
-        break;
-    case spherehorn::Status::EXIT:
-        out << "Status::EXIT";
-        break;
-    case spherehorn::Status::ABORT:
-        out << "Status::ABORT";
-        break;
+        printEnumCase(Status::OKAY);
+        printEnumCase(Status::BREAK);
+        printEnumCase(Status::EXIT);
+        printEnumCase(Status::ABORT);
     }
     return out;
 }
+
+std::ostream& operator <<(std::ostream& out, spherehorn::Token::TokenType type) {
+    switch (type) {
+        printEnumCase(Token::KEYWORD);
+        printEnumCase(Token::TERMINATOR_NORMAL);
+        printEnumCase(Token::TERMINATOR_CONDITIONAL);
+        printEnumCase(Token::START_BLOCK);
+        printEnumCase(Token::END_BLOCK);
+        printEnumCase(Token::START_MEMORY);
+        printEnumCase(Token::END_MEMORY);
+        printEnumCase(Token::NUMBER);
+        printEnumCase(Token::STRING);
+        printEnumCase(Token::CHAR);
+        printEnumCase(Token::END);
+    }
+    return out;
+}
+
+#undef printEnumCase
 
 std::ostream& operator<<(std::ostream& out, const spherehorn::ProgramState& state) {
     out << "ProgramState @ " << &state << " {\n"

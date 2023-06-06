@@ -45,6 +45,13 @@ namespace Instructions {
     decl(Or);
     decl(Xor);
 
+    decl(Greater);
+    decl(Equal);
+    decl(Less);
+    decl(GreaterOrEqual);
+    decl(LessOrEqual);
+    decl(NotEqual);
+
     decl(MemoryBack);
     decl(MemoryForward);
 }

@@ -119,6 +119,37 @@ impl(Xor) {
 }
 
 
+impl(Greater) {
+    state.condRegister = state.accRegister > arg->get();
+    return Status::OKAY;
+}
+
+impl(Equal) {
+    state.condRegister = state.accRegister == arg->get();
+    return Status::OKAY;
+}
+
+impl(Less) {
+    state.condRegister = state.accRegister < arg->get();
+    return Status::OKAY;
+}
+
+impl(GreaterOrEqual) {
+    state.condRegister = state.accRegister >= arg->get();
+    return Status::OKAY;
+}
+
+impl(LessOrEqual) {
+    state.condRegister = state.accRegister <= arg->get();
+    return Status::OKAY;
+}
+
+impl(NotEqual) {
+    state.condRegister = state.accRegister != arg->get();
+    return Status::OKAY;
+}
+
+
 impl(MemoryBack) {
     state.memoryPtr = state.memoryPtr->shiftBack(arg->get());
     return Status::OKAY;

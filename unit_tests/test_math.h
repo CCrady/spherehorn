@@ -17,7 +17,7 @@ void testMathInstructions() {
     name = "Increment";
     resetState(state);
     Instructions::Increment inc(false);
-    inc.run(state);
+    assertOkay(inc);
     assertAccEq(11);
 
     name = "Decrement";
@@ -32,9 +32,9 @@ void testMathInstructions() {
     name = "Invert";
     resetState(state);
     Instructions::Invert inv(false);
-    inv.run(state);
+    assertOkay(inv);
     assertCondEq(true);
-    inv.run(state);
+    assertOkay(inv);
     assertCondEq(false);
 
     Arguments::Argument* arg;
@@ -43,7 +43,7 @@ void testMathInstructions() {
     resetState(state);
     arg = createConstArg(3);
     Instructions::Add add(false, arg);
-    add.run(state);
+    assertOkay(add);
     assertAccEq(13);
 
     name = "Subtract";
@@ -72,7 +72,7 @@ void testMathInstructions() {
     resetState(state);
     arg = createConstArg(3);
     Instructions::Multiply mul(false, arg);
-    mul.run(state);
+    assertOkay(mul);
     assertAccEq(30);
 
     name = "Divide";
@@ -126,31 +126,31 @@ void testMathInstructions() {
     state.condRegister = true;
     arg = createConstArg(3);
     Instructions::And and1(false, arg);
-    and1.run(state);
+    assertOkay(and1);
     assertCondEq(true);
     arg = createConstArg(0);
     Instructions::And and2(false, arg);
-    and2.run(state);
+    assertOkay(and2);
     assertCondEq(false);
 
     name = "Or";
     resetState(state);
     arg = createConstArg(0);
     Instructions::Or or1(false, arg);
-    or1.run(state);
+    assertOkay(or1);
     assertCondEq(false);
     arg = createConstArg(3);
     Instructions::Or or2(false, arg);
-    or2.run(state);
+    assertOkay(or2);
     assertCondEq(true);
 
     name = "Xor";
     resetState(state);
     arg = createConstArg(1);
     Instructions::Xor xor1(false, arg);
-    xor1.run(state);
+    assertOkay(xor1);
     assertCondEq(true);
-    xor1.run(state);
+    assertOkay(xor1);
     assertCondEq(false);
 
     endGroup();

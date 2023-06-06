@@ -19,7 +19,7 @@ void testIOInstructions() {
     resetState(state, cell);
     Instructions::InputChar chin(false);
     toCin.str("AB");
-    chin.run(state);
+    assertOkay(chin);
     assert(cell.getVal(), == 'A');
     assert(cin.get(), == 'B');
 
@@ -35,21 +35,21 @@ void testIOInstructions() {
     resetState(state, cell);
     Instructions::InputNum numin(false);
     toCin.str("345\n");
-    numin.run(state);
+    assertOkay(numin);
     assert(cell.getVal(), == 345);
     assert(cin.get(), == '\n');
 
     name = "Output Num";
     fromCout.str("");
     Instructions::OutputNum numout(false);
-    numout.run(state);
+    assertOkay(numout);
     assert(fromCout.str(), == "345");
 
     name = "Input String";
     resetState(state, cell);
     Instructions::InputString strin(false);
     toCin.str("Foo Bar Baz!\nX");
-    strin.run(state);
+    assertOkay(strin);
     assert(cell.getVal(), == 12);
     assert(cell.getChild()->getVal(), == 'F');
     assert(cin.get(), == 'X');
@@ -57,7 +57,7 @@ void testIOInstructions() {
     name = "Output String";
     fromCout.str("");
     Instructions::OutputString strout(false);
-    strout.run(state);
+    assertOkay(strout);
     assert(fromCout.str(), == "Foo Bar Baz!");
 
     endGroup();

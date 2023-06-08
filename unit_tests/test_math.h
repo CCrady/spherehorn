@@ -37,7 +37,7 @@ void testMathInstructions() {
     assertOkay(inv);
     assertCondEq(false);
 
-    Arguments::Argument* arg;
+    arg_ptr arg;
 
     name = "Add";
     resetState(state);

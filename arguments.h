@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <memory>
 #include "definitions.h"
 #include "program_state.h"
 
@@ -36,6 +37,8 @@ namespace Arguments {
         num get();
     };
 }
+
+using arg_ptr = std::unique_ptr<Arguments::Argument>;
 
 }
 

@@ -21,9 +21,9 @@ namespace spherehorn {
 
 class InstructionBlock : public InstructionContainer {
 private:
-    std::vector<std::unique_ptr<InstructionContainer>> instrs;
+    std::vector<instr_ptr> instrs;
 public:
-    void insertInstr(std::unique_ptr<InstructionContainer>& instr) {
+    void insertInstr(instr_ptr& instr) {
         instrs.push_back(std::move(instr));
     }
     // execute each instruction in instrs in a loop until we break out

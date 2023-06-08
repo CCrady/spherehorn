@@ -10,7 +10,6 @@
 #include "unit_tests.h"
 using namespace spherehorn;
 using namespace std;
-using instr_ptr = unique_ptr<InstructionContainer>;
 
 void testControlFlow() {
     startGroup("Test control flow");

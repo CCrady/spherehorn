@@ -13,7 +13,7 @@ void testSetterInstructions() {
     startGroup("Testing setter instructions");
 
     ProgramState state;
-    Arguments::Argument* arg;
+    arg_ptr arg;
 
     name = "Set Accumulator";
     resetState(state);

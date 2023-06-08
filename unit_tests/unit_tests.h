@@ -43,8 +43,8 @@ void resetState(ProgramState& state, MemoryCell& cell) {
     cell.setVal(0);
 }
 
-Arguments::Argument* createConstArg(num x) {
-    return new Arguments::Constant(x);
+arg_ptr createConstArg(num x) {
+    return arg_ptr(new Arguments::Constant(x));
 }
 
 #define startGroup(header) \

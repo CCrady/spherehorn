@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <memory>
 #include <utility>
 #include "../definitions.h"
 #include "../program_state.h"
@@ -12,7 +11,8 @@
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
     class A : public UnaryInstruction { \
-    public: A(bool _isConditional, Arguments::Argument* _arg) : UnaryInstruction(_isConditional, _arg) {} \
+    public: A(bool _isConditional, arg_ptr& _arg) : UnaryInstruction(_isConditional, _arg) {} \
+    public: A(bool _isConditional, arg_ptr&& _arg) : UnaryInstruction(_isConditional, _arg) {} \
     protected: Status action(ProgramState& state); \
     }
 
@@ -21,11 +21,11 @@ namespace spherehorn {
 namespace Instructions {
     class UnaryInstruction : public Instruction {
     protected:
-        std::unique_ptr<Arguments::Argument> arg;
+        arg_ptr arg;
     public:
-        UnaryInstruction(bool _isConditional, Arguments::Argument* _arg) : // TODO: pass a unique_ptr instead of a raw pointer
+        UnaryInstruction(bool _isConditional, arg_ptr& _arg) :
             Instruction(_isConditional),
-            arg(_arg) {}
+            arg(std::move(_arg)) {}
     };
 
     decl(SetAccumulator);

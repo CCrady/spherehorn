@@ -13,6 +13,7 @@ Various instruction types branch off of Instruction.
 
 #pragma once
 
+#include <memory>
 #include "program_state.h"
 
 namespace spherehorn {
@@ -30,6 +31,8 @@ class InstructionContainer {
 public:
     virtual Status run(ProgramState& state) = 0;
 };
+
+using instr_ptr = std::unique_ptr<InstructionContainer>;
 
 }
 

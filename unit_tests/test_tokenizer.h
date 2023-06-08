@@ -12,89 +12,79 @@ void testTokenizer() {
 
     name = "Basic token categories";
     std::stringstream str1 (
-        "a bc !!ASDF " // keyword
+        "as bc **ASDF " // instruction
+        ". " // memory setter
+        "a m " // variable
         "2 0b101 0o7 0d96 0xdeadbeef " // number
         "( { ) } " // grouping
-        "; ? " // terminator
+        "; ? ! " // terminator
         "'d' '\\n' '\\'' '\"' ' ' " // character
         "\"\" \"hi there!!\" \"f\" " // string
     );
     Tokenizer tokens1 (str1);
-    // keywords
+    // instructions
     token = tokens1.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "a");
+    assertTokenEq(INSTRUCTION, "as");
     token = tokens1.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "bc");
+    assertTokenEq(INSTRUCTION, "bc");
     token = tokens1.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "!!ASDF");
+    assertTokenEq(INSTRUCTION, "**ASDF");
+    // memory setter
+    token = tokens1.next();
+    assertTokenEq(MEMSET, ".");
+    // variables
+    token = tokens1.next();
+    assertTokenEq(VARIABLE, "a");
+    token = tokens1.next();
+    assertTokenEq(VARIABLE, "m");
     // numbers
     token = tokens1.next();
-    assert(token.type, == Token::NUMBER);
-    assert(token.str, == "2");
+    assertTokenEq(NUMBER, "2");
     token = tokens1.next();
-    assert(token.type, == Token::NUMBER);
-    assert(token.str, == "0b101");
+    assertTokenEq(NUMBER, "0b101");
     token = tokens1.next();
-    assert(token.type, == Token::NUMBER);
-    assert(token.str, == "0o7");
+    assertTokenEq(NUMBER, "0o7");
     token = tokens1.next();
-    assert(token.type, == Token::NUMBER);
-    assert(token.str, == "0d96");
+    assertTokenEq(NUMBER, "0d96");
     token = tokens1.next();
-    assert(token.type, == Token::NUMBER);
-    assert(token.str, == "0xdeadbeef");
+    assertTokenEq(NUMBER, "0xdeadbeef");
     // grouping
     token = tokens1.next();
-    assert(token.type, == Token::START_MEMORY);
-    assert(token.str, == "(");
+    assertTokenEq(GROUPING, "(");
     token = tokens1.next();
-    assert(token.type, == Token::START_BLOCK);
-    assert(token.str, == "{");
+    assertTokenEq(GROUPING, "{");
     token = tokens1.next();
-    assert(token.type, == Token::END_MEMORY);
-    assert(token.str, == ")");
+    assertTokenEq(GROUPING, ")");
     token = tokens1.next();
-    assert(token.type, == Token::END_BLOCK);
-    assert(token.str, == "}");
+    assertTokenEq(GROUPING, "}");
     // terminators
     token = tokens1.next();
-    assert(token.type, == Token::TERMINATOR_NORMAL);
-    assert(token.str, == ";");
+    assertTokenEq(TERMINATOR, ";");
     token = tokens1.next();
-    assert(token.type, == Token::TERMINATOR_CONDITIONAL);
-    assert(token.str, == "?");
+    assertTokenEq(TERMINATOR, "?");
+    token = tokens1.next();
+    assertTokenEq(TERMINATOR, "!");
     // characters
     token = tokens1.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "'d'");
+    assertTokenEq(CHAR, "'d'");
     token = tokens1.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "'\\n'");
+    assertTokenEq(CHAR, "'\\n'");
     token = tokens1.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "'\\''");
+    assertTokenEq(CHAR, "'\\''");
     token = tokens1.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "'\"'");
+    assertTokenEq(CHAR, "'\"'");
     token = tokens1.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "' '");
+    assertTokenEq(CHAR, "' '");
     // strings
     token = tokens1.next();
-    assert(token.type, == Token::STRING);
-    assert(token.str, == "\"\"");
+    assertTokenEq(STRING, "\"\"");
     token = tokens1.next();
-    assert(token.type, == Token::STRING);
-    assert(token.str, == "\"hi there!!\"");
+    assertTokenEq(STRING, "\"hi there!!\"");
     token = tokens1.next();
-    assert(token.type, == Token::STRING);
-    assert(token.str, == "\"f\"");
+    assertTokenEq(STRING, "\"f\"");
     // EOF
     token = tokens1.next();
-    assert(token.type, == Token::END);
+    assertTokenEq(END, "");
     assert(tokens1.isEnd(),);
 
     name = "Whitespace and comments";
@@ -107,57 +97,89 @@ void testTokenizer() {
         "  C D   \n"
         "'\\n'#comment 5\n"
         "\"\"# comment 6\n"
-        "\" efg #\" H # comment 7\n"
-        "'#' ;?#comment 8"
+        "\" str #\" E # comment 7\n"
+        "'#' ;.}(?#comment 8"
     );
     Tokenizer tokens2 (str2);
     assert(tokens2.line(), == 1);
     token = tokens2.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "A");
+    assertTokenEq(INSTRUCTION, "A");
     assert(tokens2.line(), == 2);
     token = tokens2.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "B");
+    assertTokenEq(INSTRUCTION, "B");
     assert(tokens2.line(), == 3);
     token = tokens2.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "C");
+    assertTokenEq(INSTRUCTION, "C");
     assert(tokens2.line(), == 6);
     token = tokens2.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "D");
+    assertTokenEq(INSTRUCTION, "D");
     assert(tokens2.line(), == 6);
     token = tokens2.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "'\\n'");
+    assertTokenEq(CHAR, "'\\n'");
     assert(tokens2.line(), == 7);
     token = tokens2.next();
-    assert(token.type, == Token::STRING);
-    assert(token.str, == "\"\"");
+    assertTokenEq(STRING, "\"\"");
     assert(tokens2.line(), == 8);
     token = tokens2.next();
-    assert(token.type, == Token::STRING);
-    assert(token.str, == "\" efg #\"");
+    assertTokenEq(STRING, "\" str #\"");
     assert(tokens2.line(), == 9);
     token = tokens2.next();
-    assert(token.type, == Token::KEYWORD);
-    assert(token.str, == "H");
+    assertTokenEq(INSTRUCTION, "E");
     assert(tokens2.line(), == 9);
     token = tokens2.next();
-    assert(token.type, == Token::CHAR);
-    assert(token.str, == "'#'");
+    assertTokenEq(CHAR, "'#'");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
-    assert(token.type, == Token::TERMINATOR_NORMAL);
-    assert(token.str, == ";");
+    assertTokenEq(TERMINATOR, ";");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
-    assert(token.type, == Token::TERMINATOR_CONDITIONAL);
-    assert(token.str, == "?");
+    assertTokenEq(MEMSET, ".");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
-    assert(token.type, == Token::END);
+    assertTokenEq(GROUPING, "}");
+    assert(tokens2.line(), == 10);
+    token = tokens2.next();
+    assertTokenEq(GROUPING, "(");
+    assert(tokens2.line(), == 10);
+    token = tokens2.next();
+    assertTokenEq(TERMINATOR, "?");
+    assert(tokens2.line(), == 10);
+    token = tokens2.next();
+    assertTokenEq(END, "");
+
+    name = ".next() and .peek()";
+    std::stringstream str3 (
+        "A B ;C;"
+    );
+    Tokenizer tokens3 (str3);
+    token = tokens3.peek();
+    assertTokenEq(INSTRUCTION, "A");
+    token = tokens3.peek();
+    assertTokenEq(INSTRUCTION, "A");
+    token = tokens3.next();
+    assertTokenEq(INSTRUCTION, "A");
+    token = tokens3.peek();
+    assertTokenEq(INSTRUCTION, "B");
+    token = tokens3.next();
+    assertTokenEq(INSTRUCTION, "B");
+    token = tokens3.peek();
+    assertTokenEq(TERMINATOR, ";");
+    token = tokens3.next();
+    assertTokenEq(TERMINATOR, ";");
+    token = tokens3.peek();
+    assertTokenEq(INSTRUCTION, "C");
+    token = tokens3.next();
+    assertTokenEq(INSTRUCTION, "C");
+    token = tokens3.peek();
+    assertTokenEq(TERMINATOR, ";");
+    token = tokens3.next();
+    assertTokenEq(TERMINATOR, ";");
+    token = tokens3.peek();
+    assertTokenEq(END, "");
+    token = tokens3.next();
+    assertTokenEq(END, "");
+    token = tokens3.next();
+    assertTokenEq(END, "");
 
     endGroup();
 }

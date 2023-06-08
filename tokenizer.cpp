@@ -1,5 +1,6 @@
 // tokenizer.cpp
 
+#include <string>
 #include <istream>
 #include <sstream>
 #include <limits>
@@ -8,20 +9,53 @@ using namespace spherehorn;
 
 
 namespace {
-    constexpr bool isKeywordTerminator(char ch) {
-        return isspace(ch) || ch == '{' || ch == '}' || ch == '(' || ch == ')' || ch == ';' || ch == '?' || ch == '#';
+    constexpr bool isGrouping(char ch) {
+        return ch == '{' || ch == '}' || ch == '(' || ch == ')';
     }
+
+    constexpr bool isInstructionTerminator(char ch) {
+        return ch == ';' || ch == '?' || ch == '!';
+    }
+
+    constexpr bool isWordTerminator(char ch) {
+        return isspace(ch) || isGrouping(ch) || isInstructionTerminator(ch) || ch == '#';
+    }
+
+    constexpr bool isVariableCh(char ch) {
+        return ch == 'a' || ch == 'm';
+    }
+
+    constexpr bool isBoolCh(char ch) {
+        return ch == 'T' || ch == 'F';
+    }
+}
+
+Token Tokenizer::next() {
+    setUpcoming();
+    isUpcomingCurrent_ = false;
+    return upcoming_;
+}
+
+Token Tokenizer::peek() {
+    setUpcoming();
+    return upcoming_;
 }
 
 // how to determine the token's type:
 // first character:
-//   case ;, ?, {, }, (, ): special type corresponding to the particular character
+//   case ;, ?, !, {, }, (, ): special type corresponding to the particular character
 //   case digit: number literal
 //   case ': char literal
 //   case ": string literal
-//   default: keyword
+//   case .: memory setter
+//   case a, m, and next character is a word terminator: variable
+//   case T, F, and next character is a word terminator: bool
+//   else: instruction
 // TODO: refactor this to be less spaghetti
-Token Tokenizer::next() {
+void Tokenizer::setUpcoming() {
+    // if we've already set upcoming_ to the right value, we don't need to do anything
+    if (isUpcomingCurrent_) return;
+
     char ch = 0;
     do {
         ch = getCh();
@@ -29,45 +63,42 @@ Token Tokenizer::next() {
     } while (isspace(ch) || ch == '#');
     // ch is now the first character of the first unprocessed token
     // figure out the type of the token
-    Token::TokenType type = Token::END;
     if (isEnd()) {
-        type = Token::END;
-    } else if (ch == ';') {
-        type = Token::TERMINATOR_NORMAL;
-    } else if (ch == '?') {
-        type = Token::TERMINATOR_CONDITIONAL;
-    } else if (ch == '{') {
-        type = Token::START_BLOCK;
-    } else if (ch == '}') {
-        type = Token::END_BLOCK;
-    } else if (ch == '(') {
-        type = Token::START_MEMORY;
-    } else if (ch == ')') {
-        type = Token::END_MEMORY;
+        upcoming_.type = Token::END;
+    } else if (ch == '.') {
+        upcoming_.type = Token::MEMSET;
+    } else if (isInstructionTerminator(ch)) {
+        upcoming_.type = Token::TERMINATOR;
+    } else if (isGrouping(ch)) {
+        upcoming_.type = Token::GROUPING;
     } else if (isdigit(ch)) {
-        type = Token::NUMBER;
+        upcoming_.type = Token::NUMBER;
     } else if (ch == '\'') {
-        type = Token::CHAR;
+        upcoming_.type = Token::CHAR;
     } else if (ch == '\"') {
-        type = Token::STRING;
+        upcoming_.type = Token::STRING;
+    } else if (isVariableCh(ch) && isWordTerminator(input_.peek())) {
+        upcoming_.type = Token::VARIABLE;
+    } else if (isBoolCh(ch) && isWordTerminator(input_.peek())) {
+        upcoming_.type = Token::BOOL;
     } else {
-        type = Token::KEYWORD;
+        upcoming_.type = Token::INSTRUCTION;
     }
 
+    // based on the token type we figured out, find the token string
     str_.str("");
-    switch (type) {
-        case Token::TERMINATOR_NORMAL:
-        case Token::TERMINATOR_CONDITIONAL:
-        case Token::START_BLOCK:
-        case Token::END_BLOCK:
-        case Token::START_MEMORY:
-        case Token::END_MEMORY:
+    switch (upcoming_.type) {
+        case Token::MEMSET:
+        case Token::TERMINATOR:
+        case Token::GROUPING:
+        case Token::VARIABLE:
+        case Token::BOOL:
             str_.put(ch);
             break;
         case Token::NUMBER:
-        case Token::KEYWORD:
+        case Token::INSTRUCTION:
             str_.put(ch);
-            while (!isKeywordTerminator(input_.peek())) {
+            while (!isWordTerminator(input_.peek())) {
                 str_.put(getCh());
             }
             break;
@@ -96,8 +127,9 @@ Token Tokenizer::next() {
         case Token::END:
             break;
     }
+    upcoming_.str = str_.str();
 
-    return Token(type, str_.str());
+    isUpcomingCurrent_ = true; // we just set upcoming, so make sure to store that fact in isUpcomingCurrent_
 }
 
 char Tokenizer::getCh() {

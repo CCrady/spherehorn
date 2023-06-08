@@ -78,7 +78,7 @@ Arguments::Argument* createConstArg(num x) {
     assert(fromCerr.str(), != "");
 
 #define assertAccEq(val) \
-    assert(state.accRegister, == val) \
+    assert(state.accRegister, == val); \
     if (state.condRegister != false || state.memoryPtr != nullptr) { \
         rout << "\u001b[91m  FAILED\u001b[0m   state side effects: \n" \
                 "  > state.condRegister = " << state.condRegister << "\n" \
@@ -86,12 +86,16 @@ Arguments::Argument* createConstArg(num x) {
     }
 
 #define assertCondEq(val) \
-    assert(state.condRegister, == val) \
+    assert(state.condRegister, == val); \
     if (state.accRegister != 10 || state.memoryPtr != nullptr) { \
         rout << "\u001b[91m  FAILED\u001b[0m   state side effects: \n" \
                 "  > state.accRegister = " << state.accRegister << "\n" \
                 "  > state.memoryPtr = " << state.memoryPtr << endl; \
     }
+
+#define assertTokenEq(ttype, tstring) \
+    assert(token.type, == Token::ttype); \
+    assert(token.str, == tstring);
 
 #define endGroup() \
     rout << "Passed " \
@@ -115,16 +119,15 @@ std::ostream& operator <<(std::ostream& out, spherehorn::Status status) {
 
 std::ostream& operator <<(std::ostream& out, spherehorn::Token::TokenType type) {
     switch (type) {
-        printEnumCase(Token::KEYWORD);
-        printEnumCase(Token::TERMINATOR_NORMAL);
-        printEnumCase(Token::TERMINATOR_CONDITIONAL);
-        printEnumCase(Token::START_BLOCK);
-        printEnumCase(Token::END_BLOCK);
-        printEnumCase(Token::START_MEMORY);
-        printEnumCase(Token::END_MEMORY);
+        printEnumCase(Token::INSTRUCTION);
+        printEnumCase(Token::MEMSET);
+        printEnumCase(Token::VARIABLE);
+        printEnumCase(Token::TERMINATOR);
+        printEnumCase(Token::GROUPING);
         printEnumCase(Token::NUMBER);
         printEnumCase(Token::STRING);
         printEnumCase(Token::CHAR);
+        printEnumCase(Token::BOOL);
         printEnumCase(Token::END);
     }
     return out;

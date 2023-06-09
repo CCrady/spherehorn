@@ -111,6 +111,62 @@ void testMemoryCell() {
     assert(child2->getNext(), == child3);
     delete insertionParent;
 
+    // setup for copy constructor/assignment tests
+    MemoryCell fromParent (2);
+    MemoryCell& fromChild1 = *fromParent.getChild();
+    fromChild1.setVal(3);
+    [[maybe_unused]] MemoryCell& fromChild2 = *fromChild1.getNext();
+    MemoryCell& fromGrandchild1 = *fromChild1.getChild();
+    fromGrandchild1.setVal(4);
+    MemoryCell& fromGrandchild2 = *fromGrandchild1.getNext();
+    fromGrandchild2.setVal(5);
+    MemoryCell& fromGreatGrandchild1 = *fromGrandchild1.getChild();
+    fromGreatGrandchild1.setVal(6);
+
+    name = "Copy constructor (incomplete loop)";
+    MemoryCell toChildA1 (fromChild1);
+    assert(toChildA1.parent, == nullptr);
+    assert(toChildA1.prevSibling, == nullptr);
+    assert(toChildA1.nextSibling, == nullptr);
+    MemoryCell& toGrandchildA1 = *toChildA1.firstChild;
+    assert(&toGrandchildA1, != &fromGrandchild1);
+    assert(toGrandchildA1.getVal(), == fromGrandchild1.getVal());
+    MemoryCell& toGrandchildA2 = *toGrandchildA1.nextSibling;
+    assert(&toGrandchildA2, != &fromGrandchild2);
+    assert(toGrandchildA2.getVal(), == fromGrandchild2.getVal());
+    assert(toGrandchildA1.prevSibling, == nullptr);
+    assert(toGrandchildA2.nextSibling, == nullptr);
+    MemoryCell& toGreatGrandchildA1 = *toGrandchildA1.firstChild;
+    assert(&toGreatGrandchildA1, != &fromGreatGrandchild1);
+    assert(toGreatGrandchildA1.getVal(), == fromGreatGrandchild1.getVal());
+
+    name = "Copy constructor (complete loop)";
+    MemoryCell& fromGrandchild3 = *fromGrandchild1.getPrev();
+    MemoryCell toChildB1 (fromChild1);
+    MemoryCell& toGrandchildB1 = *toChildB1.firstChild;
+    assert(&toGrandchildB1, != &fromGrandchild1);
+    assert(toGrandchildB1.getVal(), == fromGrandchild1.getVal());
+    MemoryCell& toGrandchildB2 = *toGrandchildB1.nextSibling;
+    assert(&toGrandchildB2, != &fromGrandchild2);
+    assert(toGrandchildB2.getVal(), == fromGrandchild2.getVal());
+    MemoryCell& toGrandchildB3 = *toGrandchildB2.nextSibling;
+    assert(&toGrandchildB3, != &fromGrandchild3);
+    assert(toGrandchildB3.getVal(), == fromGrandchild3.getVal());
+    MemoryCell& toGreatGrandchildB1 = *toGrandchildB1.firstChild;
+    assert(&toGreatGrandchildB1, != &fromGreatGrandchild1);
+    assert(toGreatGrandchildB1.getVal(), == fromGreatGrandchild1.getVal());
+
+    name = "Copy constructor (independence)";
+    fromGrandchild2.setVal(7);
+    assert(toGrandchildA2.getVal(), == 5);
+    assert(toGrandchildB2.getVal(), == 5);
+    toGrandchildA1.setVal(8);
+    assert(fromGrandchild1.getVal(), == 4);
+    toChildA1.setVal(9);
+    assert(fromChild1.getVal(), == 3);
+    toGreatGrandchildB1.setVal(1);
+    assert(fromGreatGrandchild1.getVal(), == 6);
+
     endGroup();
 }
 

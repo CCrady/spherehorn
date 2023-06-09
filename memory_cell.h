@@ -22,6 +22,9 @@ public:
     MemoryCell(num _value = 0) : value(_value) {}
     // Construct a memory cell whose contents are the string
     MemoryCell(const std::string& str);
+    // Copy assignment. Copies children and value, but doesn't change parent or siblings
+    MemoryCell& operator =(const MemoryCell& other);
+    MemoryCell(const MemoryCell& other) { *this = other; } // copy constructor can simply use =
     ~MemoryCell();
     num getVal();
     void setVal(num _value);
@@ -38,6 +41,8 @@ public:
     MemoryCell* insertAfter(num _value = 0);
     // Insert child as the last child of this memory cell
     void insertChild(MemoryCell* child);
+    // Recursively make copies of all of other's children and set them as children of this
+    void copyChildren(MemoryCell& other);
     bool isTop();
 };
 

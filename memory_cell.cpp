@@ -17,6 +17,52 @@ MemoryCell::MemoryCell(const string& str) : value(str.size()) {
     }
 }
 
+MemoryCell& MemoryCell::operator =(const MemoryCell& other) {
+    // if we're trying to set a cell to itself, we don't need to do anything
+    if (this == &other) return *this;
+
+    reset();
+    value = other.value;
+    // if other doesn't have any instantiated children, we're done
+    if (other.numChildrenInstantiated == 0) return *this;
+    // otherwise we need to make copies of other's children
+
+    numChildrenInstantiated = other.numChildrenInstantiated; // this isn't true yet, but it will be once we're done
+    // make a copy of other's first child so that we have a starting point
+    firstChild = new MemoryCell(*other.firstChild);
+
+    // iterate forwards over other's children, starting with the child after the first
+    MemoryCell* otherCurrChild = nullptr;
+    MemoryCell* thisCurrChild = nullptr;
+    MemoryCell* thisPrevChild = firstChild;
+    for (otherCurrChild = other.firstChild->nextSibling;
+         otherCurrChild != nullptr && otherCurrChild != other.firstChild;
+         otherCurrChild = otherCurrChild->nextSibling) {
+        thisCurrChild = new MemoryCell(*otherCurrChild); // create a copy of otherCurrChild
+        thisPrevChild->nextSibling = thisCurrChild; // link thisCurrChild up with thisPrevChild
+        thisCurrChild->prevSibling = thisPrevChild;
+        thisPrevChild = thisCurrChild;
+    }
+    // if we looped all the way around, attach the end to the start and exit
+    if (otherCurrChild == other.firstChild) {
+        thisPrevChild->nextSibling = firstChild;
+        firstChild->prevSibling = thisPrevChild;
+        return *this;
+    }
+    // otherwise iterate backwards over other's children
+    MemoryCell* thisNextChild = firstChild;
+    for (otherCurrChild = other.firstChild->prevSibling;
+         otherCurrChild != nullptr;
+         otherCurrChild = otherCurrChild->prevSibling) {
+        thisCurrChild = new MemoryCell(*otherCurrChild); // create a copy of otherCurrChild
+        thisNextChild->prevSibling = thisCurrChild; // link thisCurrChild up with thisNextChild
+        thisCurrChild->nextSibling = thisNextChild;
+        thisNextChild = thisCurrChild;
+    }
+
+    return *this;
+}
+
 MemoryCell::~MemoryCell() {
     reset();
 }

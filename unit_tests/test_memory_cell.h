@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 // this is terrible but I need to test MemoryCell's internals
 #define private public
 #include "../memory_cell.h"
@@ -214,6 +215,19 @@ void testMemoryCell() {
     name = "Copy assignment (overwriting)";
     toGrandchildB2 = fromChild1;
     assertCopies(fromChild1, toGrandchildB2);
+
+    name = "Copy assignment (from self)";
+    toGrandchildB2 = toGrandchildB2;
+    assertCopies(fromChild1, toGrandchildB2);
+
+    name = "Move constructor";
+    MemoryCell moveChild1 (std::move(toChildB1));
+    assert(moveChild1.parent, == nullptr);
+    assert(moveChild1.prevSibling, == nullptr);
+    assert(moveChild1.nextSibling, == nullptr);
+    assert(moveChild1.getChild(), == &toGrandchildB1);
+    assert(toGrandchildB1.getParent(), == &moveChild1);
+    assert(toGrandchildB2.getParent(), == &moveChild1);
 
     endGroup();
 }

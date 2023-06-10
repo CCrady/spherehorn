@@ -30,6 +30,7 @@ MemoryCell& MemoryCell::operator =(const MemoryCell& other) {
     numChildrenInstantiated = other.numChildrenInstantiated; // this isn't true yet, but it will be once we're done
     // make a copy of other's first child so that we have a starting point
     firstChild = new MemoryCell(*other.firstChild);
+    firstChild->parent = this; // make sure to set the parent
 
     // iterate forwards over other's children, starting with the child after the first
     MemoryCell* otherCurrChild = nullptr;
@@ -41,6 +42,7 @@ MemoryCell& MemoryCell::operator =(const MemoryCell& other) {
         thisCurrChild = new MemoryCell(*otherCurrChild); // create a copy of otherCurrChild
         thisPrevChild->nextSibling = thisCurrChild; // link thisCurrChild up with thisPrevChild
         thisCurrChild->prevSibling = thisPrevChild;
+        thisCurrChild->parent = this; // make sure to set the parent
         thisPrevChild = thisCurrChild;
     }
     // if we looped all the way around, attach the end to the start and exit
@@ -57,6 +59,7 @@ MemoryCell& MemoryCell::operator =(const MemoryCell& other) {
         thisCurrChild = new MemoryCell(*otherCurrChild); // create a copy of otherCurrChild
         thisNextChild->prevSibling = thisCurrChild; // link thisCurrChild up with thisNextChild
         thisCurrChild->nextSibling = thisNextChild;
+        thisCurrChild->parent = this; // make sure to set the parent
         thisNextChild = thisCurrChild;
     }
 
@@ -67,7 +70,7 @@ MemoryCell::~MemoryCell() {
     reset();
 }
 
-num MemoryCell::getVal() {
+num MemoryCell::getVal() const {
     return value;
 }
 
@@ -184,7 +187,7 @@ MemoryCell* MemoryCell::getNext() {
     return nextSibling;
 }
 
-MemoryCell* MemoryCell::getParent() {
+MemoryCell* MemoryCell::getParent() const {
     return parent;
 }
 
@@ -246,7 +249,7 @@ void MemoryCell::insertChild(MemoryCell* newChild) {
     numChildrenInstantiated++;
 }
 
-bool MemoryCell::isTop() {
+bool MemoryCell::isTop() const {
     return parent == nullptr;
 }
 

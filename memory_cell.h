@@ -26,13 +26,13 @@ public:
     MemoryCell& operator =(const MemoryCell& other);
     MemoryCell(const MemoryCell& other) { *this = other; } // copy constructor can simply use =
     ~MemoryCell();
-    num getVal();
+    num getVal() const;
     void setVal(num _value);
     void reset();
     MemoryCell* getChild();
     MemoryCell* getPrev();
     MemoryCell* getNext();
-    MemoryCell* getParent();
+    MemoryCell* getParent() const;
     MemoryCell* shiftBack(num n);
     MemoryCell* shiftForward(num n);
     // Construct a new memory cell with the given value and insert it just before/after this cell.
@@ -43,7 +43,7 @@ public:
     void insertChild(MemoryCell* child);
     // Recursively make copies of all of other's children and set them as children of this
     void copyChildren(MemoryCell& other);
-    bool isTop();
+    bool isTop() const;
 };
 
 }

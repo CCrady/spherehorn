@@ -55,14 +55,14 @@ arg_ptr createConstArg(num x) {
 
 #define assert(var, test) \
     { \
-    auto val = var; \
-    numTests++; \
-    if (val test) { \
-        numPassed++; \
-    } else { \
-        rout << "\u001b[91m  FAILED\u001b[0m " << setw(20) << name << ":  " #var " " #test "\n" \
-                "  > " #var " = " << val << endl; \
-    } \
+        auto val = var; \
+        numTests++; \
+        if (val test) { \
+            numPassed++; \
+        } else { \
+            rout << "\u001b[91m  FAILED\u001b[0m " << setw(20) << name << ":  " #var " " #test "\n" \
+                    "  > " #var " = " << val << endl; \
+        } \
     }
 
 #define assertOkay(instr) \
@@ -141,6 +141,23 @@ std::ostream& operator<<(std::ostream& out, const spherehorn::ProgramState& stat
            "    condRegister = " << state.condRegister << "\n"
            "    memoryPtr = " << state.memoryPtr << "\n"
            "}" << std::endl;
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, spherehorn::MemoryCell cell) {
+    out << cell.getVal() << " @ " << &cell;
+    // if we haven't instantiated any children, then we're done
+    if (cell.numChildrenInstantiated == 0) return out;
+
+    out << ": ( ";
+    spherehorn::MemoryCell* firstChild = cell.getChild();
+    out << *firstChild << " ";
+    for (spherehorn::MemoryCell* currChild = firstChild->getNext();
+         currChild != firstChild;
+         currChild = currChild->getNext()) {
+        out << *currChild << " ";
+    }
+    out << ")";
     return out;
 }
 

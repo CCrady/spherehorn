@@ -6,4 +6,5 @@
 #include "instruction.h"
 #include "nullary.h"
 #include "unary.h"
+#include "set_memory.h"
 

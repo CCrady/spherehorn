@@ -2,6 +2,7 @@
 
 #include "../program_state.h"
 #include "../memory_cell.h"
+#include "../instructions/instructions.h"
 #include "unit_tests.h"
 
 void testMemoryManipulatorInstructions() {
@@ -28,8 +29,6 @@ void testMemoryManipulatorInstructions() {
     Instructions::MemoryDown memdown (false);
     assertOkay(memdown);
     assert(state.memoryPtr, == &childCell2);
-
-    // TODO: MemoryPrev, MemoryNext, MemoryBack, MemoryForward
 
     name = "Memory Prev";
     cell.setVal(6);
@@ -82,6 +81,21 @@ void testMemoryManipulatorInstructions() {
     Instructions::MemoryForward memfwd6 (false, createConstArg(6));
     assertOkay(memfwd6);
     assert(state.memoryPtr, == &mainChild);
+
+    name = "Memory setter";
+    resetState(state, cell);
+    MemoryCell setCell (4);
+    MemoryCell& setCellChild = *setCell.getChild();
+    setCellChild.setVal(5);
+    Instructions::SetMemory setmem (false, setCell);
+    assertOkay(setmem);
+    assertCopies(cell, setCell);
+    MemoryCell& childCell3 = *cell.getChild();
+    resetState(state, childCell3);
+    childCell3.getChild()->setVal(2);
+    assertOkay(setmem);
+    assertCopies(childCell3, setCell);
+    assert(childCell3.getParent(), == &cell);
 
     endGroup();
 }

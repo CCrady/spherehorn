@@ -16,20 +16,30 @@ void testControlFlow() {
 
     ProgramState state;
 
-    name = "Conditionals";
+    name = "Conditionals (?)";
     resetState(state);
     state.condRegister = false;
-    Instructions::Increment inc(true);
-    inc.run(state);
+    Instructions::Increment inc1(Condition::WHEN_TRUE);
+    inc1.run(state);
     assert(state.accRegister, == 10);
     state.condRegister = true;
-    inc.run(state);
+    inc1.run(state);
+    assert(state.accRegister, == 11);
+
+    name = "Conditionals (!)";
+    resetState(state);
+    state.condRegister = false;
+    Instructions::Increment inc2(Condition::WHEN_FALSE);
+    inc2.run(state);
+    assert(state.accRegister, == 11);
+    state.condRegister = true;
+    inc2.run(state);
     assert(state.accRegister, == 11);
 
     name = "Break";
     resetState(state);
     state.condRegister = false;
-    Instructions::Break brk(true);
+    Instructions::Break brk(Condition::WHEN_TRUE);
     assertOkay(brk);
     state.condRegister = true;
     assert(brk.run(state), == Status::BREAK);
@@ -37,11 +47,11 @@ void testControlFlow() {
     name = "Blocks";
     resetState(state);
     state.condRegister = false;
-    auto dec1 = instr_ptr(new Instructions::Decrement(true));
-    auto sub1 = instr_ptr(new Instructions::Subtract(false, createConstArg(2)));
-    auto brk1 = instr_ptr(new Instructions::Break(true));
-    auto inv1 = instr_ptr(new Instructions::Invert(false));
-    InstructionBlock block;
+    auto dec1 = instr_ptr(new Instructions::Decrement(Condition::WHEN_TRUE));
+    auto sub1 = instr_ptr(new Instructions::Subtract(Condition::ALWAYS, createConstArg(2)));
+    auto brk1 = instr_ptr(new Instructions::Break(Condition::WHEN_TRUE));
+    auto inv1 = instr_ptr(new Instructions::Invert(Condition::ALWAYS));
+    InstructionBlock block (Condition::WHEN_FALSE);
     block.insertInstr(dec1);
     block.insertInstr(sub1);
     block.insertInstr(brk1);

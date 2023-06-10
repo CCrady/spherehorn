@@ -17,7 +17,7 @@ void testMemoryManipulatorInstructions() {
     childCell1.setVal(1);
     MemoryCell& grandchildCell1 = *childCell1.getChild();
     resetState(state, grandchildCell1);
-    Instructions::MemoryUp memup (false);
+    Instructions::MemoryUp memup (Condition::ALWAYS);
     assertOkay(memup);
     assert(state.memoryPtr, == &childCell1);
     assertExit(memup);
@@ -26,7 +26,7 @@ void testMemoryManipulatorInstructions() {
     resetState(state, cell);
     cell.setVal(1);
     MemoryCell& childCell2 = *cell.getChild();
-    Instructions::MemoryDown memdown (false);
+    Instructions::MemoryDown memdown (Condition::ALWAYS);
     assertOkay(memdown);
     assert(state.memoryPtr, == &childCell2);
 
@@ -35,50 +35,50 @@ void testMemoryManipulatorInstructions() {
     MemoryCell& mainChild = *cell.getChild();
     resetState(state, mainChild);
     MemoryCell& prevChild = *mainChild.getPrev();
-    Instructions::MemoryPrev memprev (false);
+    Instructions::MemoryPrev memprev (Condition::ALWAYS);
     assertOkay(memprev);
     assert(state.memoryPtr, == &prevChild);
 
     name = "Memory Next";
     resetState(state, mainChild);
     MemoryCell& nextChild = *mainChild.getNext();
-    Instructions::MemoryNext memnext (false);
+    Instructions::MemoryNext memnext (Condition::ALWAYS);
     assertOkay(memnext);
     assert(state.memoryPtr, == &nextChild);
 
     name = "Memory Back";
     resetState(state, mainChild);
-    Instructions::MemoryBack memback1 (false, createConstArg(1));
+    Instructions::MemoryBack memback1 (Condition::ALWAYS, createConstArg(1));
     assertOkay(memback1);
     assert(state.memoryPtr, == &prevChild);
     resetState(state, nextChild);
-    Instructions::MemoryBack memback2 (false, createConstArg(2));
+    Instructions::MemoryBack memback2 (Condition::ALWAYS, createConstArg(2));
     assertOkay(memback2);
     assert(state.memoryPtr, == &prevChild);
     resetState(state, prevChild);
-    Instructions::MemoryBack memback4 (false, createConstArg(4));
+    Instructions::MemoryBack memback4 (Condition::ALWAYS, createConstArg(4));
     assertOkay(memback4);
     assert(state.memoryPtr, == &nextChild);
     resetState(state, mainChild);
-    Instructions::MemoryBack memback6 (false, createConstArg(6));
+    Instructions::MemoryBack memback6 (Condition::ALWAYS, createConstArg(6));
     assertOkay(memback6);
     assert(state.memoryPtr, == &mainChild);
 
     name = "Memory Forward";
     resetState(state, mainChild);
-    Instructions::MemoryForward memfwd1 (false, createConstArg(1));
+    Instructions::MemoryForward memfwd1 (Condition::ALWAYS, createConstArg(1));
     assertOkay(memfwd1);
     assert(state.memoryPtr, == &nextChild);
     resetState(state, prevChild);
-    Instructions::MemoryForward memfwd2 (false, createConstArg(2));
+    Instructions::MemoryForward memfwd2 (Condition::ALWAYS, createConstArg(2));
     assertOkay(memfwd2);
     assert(state.memoryPtr, == &nextChild);
     resetState(state, nextChild);
-    Instructions::MemoryForward memfwd4 (false, createConstArg(4));
+    Instructions::MemoryForward memfwd4 (Condition::ALWAYS, createConstArg(4));
     assertOkay(memfwd4);
     assert(state.memoryPtr, == &prevChild);
     resetState(state, mainChild);
-    Instructions::MemoryForward memfwd6 (false, createConstArg(6));
+    Instructions::MemoryForward memfwd6 (Condition::ALWAYS, createConstArg(6));
     assertOkay(memfwd6);
     assert(state.memoryPtr, == &mainChild);
 
@@ -87,7 +87,7 @@ void testMemoryManipulatorInstructions() {
     MemoryCell setCell (4);
     MemoryCell& setCellChild = *setCell.getChild();
     setCellChild.setVal(5);
-    Instructions::SetMemory setmem (false, setCell);
+    Instructions::SetMemory setmem (Condition::ALWAYS, setCell);
     assertOkay(setmem);
     assertCopies(cell, setCell);
     MemoryCell& childCell3 = *cell.getChild();

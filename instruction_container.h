@@ -3,12 +3,13 @@
 /* Class hierarchy:
 
              InstructionContainer
-              /                \
-InstructionBlock              Instruction
-                                  /|\
-                                  ...
+              /       /|\      \
+InstructionBlock      ...     UnaryInstruction
+                                     /|\
+                                     ...
 
-Various instruction types branch off of Instruction.
+Individual isntruction classes branch off of InstructionContainer (for nullary instructions and
+SetMemory) and UnaryInstruction (for unary instructions).
 */
 
 #pragma once
@@ -27,9 +28,26 @@ enum struct Status {
     ABORT,
 };
 
+enum struct Condition {
+    ALWAYS,
+    WHEN_TRUE,
+    WHEN_FALSE,
+};
+
 class InstructionContainer {
+protected:
+    Condition condition_;
+    // .action() is overloaded by subclasses to implement their individual behaviors
+    virtual Status action(ProgramState& state) = 0;
 public:
-    virtual Status run(ProgramState& state) = 0;
+    InstructionContainer(Condition condition) : condition_(condition) {}
+    // Run the overloaded .action() method, or simply do nothing if we shouldn't execute because of
+    // a conditional.
+    Status run(ProgramState& state) {
+        if (condition_ == Condition::WHEN_TRUE && !state.condRegister) return Status::OKAY;
+        if (condition_ == Condition::WHEN_FALSE && state.condRegister) return Status::OKAY;
+        return action(state);
+    }
 };
 
 using instr_ptr = std::unique_ptr<InstructionContainer>;

@@ -4,20 +4,20 @@
 
 #include "../program_state.h"
 #include "../memory_cell.h"
-#include "instruction.h"
+#include "../instruction_container.h"
 
 namespace spherehorn {
 
 namespace Instructions {
-    class SetMemory : public Instruction {
+    class SetMemory : public InstructionContainer {
     private:
         MemoryCell value_;
     public:
-        SetMemory(bool isConditional, MemoryCell& value) :
-            Instruction(isConditional),
+        SetMemory(Condition condition, MemoryCell& value) :
+            InstructionContainer(condition),
             value_(value) {}
-        SetMemory(bool isConditional, MemoryCell&& value) :
-            Instruction(isConditional),
+        SetMemory(Condition condition, MemoryCell&& value) :
+            InstructionContainer(condition),
             value_(value) {}
     protected:
         Status action(ProgramState& state);

@@ -4,12 +4,12 @@
 
 #include "../definitions.h"
 #include "../program_state.h"
-#include "instruction.h"
+#include "../instruction_container.h"
 
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
-    class A : public Instruction { \
-        public: A(bool _isConditional) : Instruction(_isConditional) {} \
+    class A : public InstructionContainer { \
+        public: A(Condition condition) : InstructionContainer(condition) {} \
         protected: Status action(ProgramState& state); \
     }
 

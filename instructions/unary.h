@@ -6,25 +6,25 @@
 #include "../definitions.h"
 #include "../program_state.h"
 #include "../arguments.h"
-#include "instruction.h"
+#include "../instruction_container.h"
 
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
     class A : public UnaryInstruction { \
-    public: A(bool _isConditional, arg_ptr& _arg) : UnaryInstruction(_isConditional, _arg) {} \
-    public: A(bool _isConditional, arg_ptr&& _arg) : UnaryInstruction(_isConditional, _arg) {} \
+    public: A(Condition condition, arg_ptr& _arg) : UnaryInstruction(condition, _arg) {} \
+    public: A(Condition condition, arg_ptr&& _arg) : UnaryInstruction(condition, _arg) {} \
     protected: Status action(ProgramState& state); \
     }
 
 namespace spherehorn {
 
 namespace Instructions {
-    class UnaryInstruction : public Instruction {
+    class UnaryInstruction : public InstructionContainer {
     protected:
         arg_ptr arg;
     public:
-        UnaryInstruction(bool _isConditional, arg_ptr& _arg) :
-            Instruction(_isConditional),
+        UnaryInstruction(Condition condition, arg_ptr& _arg) :
+            InstructionContainer(condition),
             arg(std::move(_arg)) {}
     };
 

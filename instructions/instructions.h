@@ -3,7 +3,6 @@
 // the instruction subclasses (e.g. the code for the parser) can simply include this file instead of
 // each instruction header file individually.
 
-#include "instruction.h"
 #include "nullary.h"
 #include "unary.h"
 #include "set_memory.h"

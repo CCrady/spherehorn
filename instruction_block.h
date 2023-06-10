@@ -14,8 +14,8 @@ See instruction_container.h for a more complete view of the tree.
 #include <vector>
 #include <memory>
 #include <utility>
-#include "instruction_container.h"
 #include "program_state.h"
+#include "instruction_container.h"
 
 namespace spherehorn {
 
@@ -23,11 +23,12 @@ class InstructionBlock : public InstructionContainer {
 private:
     std::vector<instr_ptr> instrs;
 public:
+    InstructionBlock(Condition condition = Condition::ALWAYS) : InstructionContainer(condition) {}
     void insertInstr(instr_ptr& instr) {
         instrs.push_back(std::move(instr));
     }
     // execute each instruction in instrs in a loop until we break out
-    Status run(ProgramState& state);
+    Status action(ProgramState& state);
 };
 
 }

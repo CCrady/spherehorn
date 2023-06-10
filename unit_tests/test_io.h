@@ -17,7 +17,7 @@ void testIOInstructions() {
 
     name = "Input Char";
     resetState(state, cell);
-    Instructions::InputChar chin(false);
+    Instructions::InputChar chin(Condition::ALWAYS);
     toCin.str("AB");
     assertOkay(chin);
     assert(cell.getVal(), == 'A');
@@ -25,7 +25,7 @@ void testIOInstructions() {
 
     name = "Output Char";
     fromCout.str("");
-    Instructions::OutputChar chout(false);
+    Instructions::OutputChar chout(Condition::ALWAYS);
     assertOkay(chout);
     assert(fromCout.str(), == "A");
     cell.setVal(999999); // not valid ASCII
@@ -33,7 +33,7 @@ void testIOInstructions() {
 
     name = "Input Num";
     resetState(state, cell);
-    Instructions::InputNum numin(false);
+    Instructions::InputNum numin(Condition::ALWAYS);
     toCin.str("345\n");
     assertOkay(numin);
     assert(cell.getVal(), == 345);
@@ -41,13 +41,13 @@ void testIOInstructions() {
 
     name = "Output Num";
     fromCout.str("");
-    Instructions::OutputNum numout(false);
+    Instructions::OutputNum numout(Condition::ALWAYS);
     assertOkay(numout);
     assert(fromCout.str(), == "345");
 
     name = "Input String";
     resetState(state, cell);
-    Instructions::InputString strin(false);
+    Instructions::InputString strin(Condition::ALWAYS);
     toCin.str("Foo Bar Baz!\nX");
     assertOkay(strin);
     assert(cell.getVal(), == 12);
@@ -56,7 +56,7 @@ void testIOInstructions() {
 
     name = "Output String";
     fromCout.str("");
-    Instructions::OutputString strout(false);
+    Instructions::OutputString strout(Condition::ALWAYS);
     assertOkay(strout);
     assert(fromCout.str(), == "Foo Bar Baz!");
 

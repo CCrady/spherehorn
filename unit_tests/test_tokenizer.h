@@ -1,6 +1,7 @@
 // test_tokenizer.h
 
 #include <sstream>
+#include <stdexcept>
 #include "../tokenizer.h"
 #include "unit_tests.h"
 using namespace spherehorn;
@@ -180,6 +181,34 @@ void testTokenizer() {
     assertTokenEq(END, "");
     token = tokens3.next();
     assertTokenEq(END, "");
+
+    name = ".discard()";
+    std::stringstream str4 (
+        "A B C D"
+    );
+    Tokenizer tokens4 (str4);
+    token = tokens4.peek();
+    assertTokenEq(INSTRUCTION, "A");
+    tokens4.discard();
+    token = tokens4.peek();
+    assertTokenEq(INSTRUCTION, "B");
+    tokens4.discard();
+    bool threwException = false;
+    try {
+        tokens4.discard();
+    } catch (std::runtime_error& e) {
+        threwException = true;
+    }
+    assert(threwException,);
+    token = tokens4.next();
+    assertTokenEq(INSTRUCTION, "C");
+    threwException = false;
+    try {
+        tokens4.discard();
+    } catch (std::runtime_error& e) {
+        threwException = true;
+    }
+    assert(threwException,);
 
     endGroup();
 }

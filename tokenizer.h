@@ -31,6 +31,10 @@ struct Token {
     TokenType type;
     std::string str;
     Token(TokenType _type = END, std::string _str = ""): type(_type), str(_str) {}
+    constexpr bool isNumericLiteral() const;
+    constexpr bool isArgument() const;
+    constexpr bool isLiteral() const;
+    constexpr bool isInstruction() const;
 };
 
 class Tokenizer {
@@ -41,11 +45,13 @@ private:
     Token upcoming_;
     bool isUpcomingCurrent_ = false;
 public:
-    Tokenizer(std::istream& input) : input_(input) {} // TODO: should this use move semantics?
+    Tokenizer(std::istream& input) : input_(input) {}
+    Tokenizer(std::istream&& input) : input_(input) {}
     Token next();
     Token peek();
-    bool isEnd() { return input_.eof(); }
-    int line() { return line_; }
+    void discard();
+    bool isEnd() const { return input_.eof(); }
+    constexpr int line() const { return line_; }
 private:
     char getCh();
     void ignoreComment();

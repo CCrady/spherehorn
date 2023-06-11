@@ -4,6 +4,7 @@
 #include <istream>
 #include <sstream>
 #include <limits>
+#include <stdexcept>
 #include "tokenizer.h"
 using namespace spherehorn;
 
@@ -30,6 +31,22 @@ namespace {
     }
 }
 
+constexpr bool Token::isNumericLiteral() const {
+    return type == CHAR || type == NUMBER || type == BOOL;
+}
+
+constexpr bool Token::isArgument() const {
+    return type == VARIABLE || isNumericLiteral();
+}
+
+constexpr bool Token::isLiteral() const {
+    return type == STRING || isNumericLiteral();
+}
+
+constexpr bool Token::isInstruction() const {
+    return type == INSTRUCTION || type == MEMSET;
+}
+
 Token Tokenizer::next() {
     setUpcoming();
     isUpcomingCurrent_ = false;
@@ -39,6 +56,11 @@ Token Tokenizer::next() {
 Token Tokenizer::peek() {
     setUpcoming();
     return upcoming_;
+}
+
+void Tokenizer::discard() {
+    if (!isUpcomingCurrent_) throw std::runtime_error("upcoming_ is not current");
+    isUpcomingCurrent_ = false;
 }
 
 // how to determine the token's type:

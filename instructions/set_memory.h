@@ -19,6 +19,7 @@ namespace Instructions {
         SetMemory(Condition condition, MemoryCell&& value) :
             InstructionContainer(condition),
             value_(value) {}
+        ~SetMemory() {}
     protected:
         Status action(ProgramState& state);
     };

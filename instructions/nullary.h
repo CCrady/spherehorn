@@ -9,8 +9,11 @@
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
     class A : public InstructionContainer { \
-        public: A(Condition condition) : InstructionContainer(condition) {} \
-        protected: Status action(ProgramState& state); \
+    public: \
+        A(Condition condition) : InstructionContainer(condition) {} \
+        ~A() {} \
+    protected: \
+        Status action(ProgramState& state); \
     }
 
 namespace spherehorn {

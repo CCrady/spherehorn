@@ -24,6 +24,7 @@ private:
     std::vector<instr_ptr> instrs;
 public:
     InstructionBlock(Condition condition = Condition::ALWAYS) : InstructionContainer(condition) {}
+    ~InstructionBlock() {}
     void insertInstr(instr_ptr& instr) {
         instrs.push_back(std::move(instr));
     }

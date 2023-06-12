@@ -11,9 +11,12 @@
 // lazy way to shorten repetitive class declarations
 #define decl(A) \
     class A : public UnaryInstruction { \
-    public: A(Condition condition, arg_ptr& _arg) : UnaryInstruction(condition, _arg) {} \
-    public: A(Condition condition, arg_ptr&& _arg) : UnaryInstruction(condition, _arg) {} \
-    protected: Status action(ProgramState& state); \
+    public: \
+        A(Condition condition, arg_ptr& _arg) : UnaryInstruction(condition, _arg) {} \
+        A(Condition condition, arg_ptr&& _arg) : UnaryInstruction(condition, _arg) {} \
+        ~A() {} \
+    protected: \
+        Status action(ProgramState& state); \
     }
 
 namespace spherehorn {

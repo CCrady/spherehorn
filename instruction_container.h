@@ -41,6 +41,7 @@ protected:
     virtual Status action(ProgramState& state) = 0;
 public:
     InstructionContainer(Condition condition) : condition_(condition) {}
+    virtual ~InstructionContainer() {}
     // Run the overloaded .action() method, or simply do nothing if we shouldn't execute because of
     // a conditional.
     Status run(ProgramState& state) {

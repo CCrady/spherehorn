@@ -9,6 +9,6 @@ Status InstructionBlock::action(ProgramState& state) {
     for (int i = 0; result == Status::OKAY; i = (i + 1) % instrs.size()) {
         result = instrs.at(i)->run(state);
     }
-    return result == Status::ABORT ? Status::ABORT : Status::OKAY;
+    return result == Status::BREAK ? Status::OKAY : result;
 }
 

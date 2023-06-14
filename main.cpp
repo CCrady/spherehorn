@@ -23,9 +23,10 @@ int main(int argc, char** argv) {
     input.close(); // we can close the file as soon as we're done parsing it
     if (program.isParseError()) {
         std::cerr << "Program was not run, as there were one or more parse errors." << std::endl;
-        return 1;
+        return 2; // return code for a parse error
     }
 
-    program.run();
+    spherehorn::Status exitStatus = program.run();
+    return exitStatus == spherehorn::Status::EXIT ? 0 : 1;
 }
 

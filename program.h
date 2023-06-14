@@ -26,9 +26,10 @@ private:
     instr_ptr instrs_;
     Tokenizer tokens_;
     bool isParseError_ = false;
+    bool hasBeenRun_ = false;
 public:
     Program(std::istream& input);
-    void run();
+    Status run();
     constexpr bool isParseError() const { return isParseError_; }
 private:
     MemoryCell* parseMemory();

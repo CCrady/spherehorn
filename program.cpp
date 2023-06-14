@@ -24,9 +24,12 @@ using std::string;
 // The function that discovers a syntax error is responsible for printing a message to cerr and
 // setting isParseError_ to true.
 
-void Program::run() {
+Status Program::run() {
     if (isParseError_) throw std::runtime_error("attempted to run a program with a parse error");
-    instrs_->run(state_);
+    if (hasBeenRun_) throw std::runtime_error("attempted to re-run a program");
+    hasBeenRun_ = true;
+    Status exit_status = instrs_->run(state_);
+    return exit_status == Status::ABORT ? Status::ABORT : Status::EXIT;
 }
 
 Program::Program(std::istream& input) : tokens_(input) {
@@ -294,7 +297,7 @@ inline instr_ptr Program::parseUnaryInstruction(const Token& code) {
         instr.reset(new Instructions::GreaterOrEqual(condition, arg));
     } else if (code.str == "<=") {
         instr.reset(new Instructions::LessOrEqual(condition, arg));
-    } else if (code.str == "!=") {
+    } else if (code.str == "/=") {
         instr.reset(new Instructions::NotEqual(condition, arg));
     } else if (code.str == "<") {
         instr.reset(new Instructions::MemoryBack(condition, arg));

@@ -10,6 +10,7 @@
 #include "test_memory_manipulators.h"
 #include "test_control_flow.h"
 #include "test_tokenizer.h"
+#include "test_program.h"
 #include "unit_tests.h"
 
 
@@ -25,6 +26,7 @@ int main() {
     testControlFlow();
     testTokenizer();
     testParser();
+    testProgram();
     return 0;
 }
 

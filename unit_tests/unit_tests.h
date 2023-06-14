@@ -52,7 +52,7 @@ arg_ptr createConstArg(num x) {
 }
 
 #define startGroup(header) \
-    rout << "### " header << endl; \
+    rout << "### " header << std::endl; \
     int numTests = 0; \
     int numPassed = 0; \
     string name;
@@ -64,8 +64,8 @@ arg_ptr createConstArg(num x) {
         if (val test) { \
             numPassed++; \
         } else { \
-            rout << "\u001b[91m  FAILED\u001b[0m " << setw(20) << name << ":  " #var " " #test "\n" \
-                    "  > " #var " = " << val << endl; \
+            rout << "\u001b[91m  FAILED\u001b[0m " << std::setw(20) << name << ":  " #var " " #test "\n" \
+                    "  > " #var " = " << val << std::endl; \
         } \
     }
 
@@ -86,7 +86,7 @@ arg_ptr createConstArg(num x) {
     if (state.condRegister != false || state.memoryPtr != nullptr) { \
         rout << "\u001b[91m  FAILED\u001b[0m   state side effects: \n" \
                 "  > state.condRegister = " << state.condRegister << "\n" \
-                "  > state.memoryPtr = " << state.memoryPtr << endl; \
+                "  > state.memoryPtr = " << state.memoryPtr << std::endl; \
     }
 
 #define assertCondEq(val) \
@@ -94,7 +94,7 @@ arg_ptr createConstArg(num x) {
     if (state.accRegister != 10 || state.memoryPtr != nullptr) { \
         rout << "\u001b[91m  FAILED\u001b[0m   state side effects: \n" \
                 "  > state.accRegister = " << state.accRegister << "\n" \
-                "  > state.memoryPtr = " << state.memoryPtr << endl; \
+                "  > state.memoryPtr = " << state.memoryPtr << std::endl; \
     }
 
 #define assertTokenEq(ttype, tstring) \
@@ -109,9 +109,9 @@ arg_ptr createConstArg(num x) {
         if (areCellsCopies(lhsVal, rhsVal)) { \
             numPassed++; \
         } else { \
-            rout << "\u001b[91m  FAILED\u001b[0m " << setw(20) << name << ":  areCellsCopies(" #lhs ", " #rhs ")\n" \
+            rout << "\u001b[91m  FAILED\u001b[0m " << std::setw(20) << name << ":  areCellsCopies(" #lhs ", " #rhs ")\n" \
                     "  > " #lhs " = " << lhsVal << "\n" \
-                    "  > " #rhs " = " << rhsVal << endl; \
+                    "  > " #rhs " = " << rhsVal << std::endl; \
         } \
     }
 
@@ -164,7 +164,12 @@ bool areCellsCopies(const spherehorn::MemoryCell& lhs, const spherehorn::MemoryC
 #define endGroup() \
     rout << "Passed " \
          << (numPassed == numTests ? "\u001b[92m" : "\u001b[91m") << numPassed << "/" << numTests \
-         << "\u001b[0m tests" << endl;
+         << "\u001b[0m tests" << std::endl;
+
+#define displayNotOpenError() \
+    numTests++; \
+    rout << "\u001b[91m  ERROR\u001b[0m  " << std::setw(20) << name << ":  " \
+         << "Could not open file " << fileName << std::endl;
 
 #define printEnumCase(val) \
     case spherehorn::val: \

@@ -31,22 +31,6 @@ namespace {
     }
 }
 
-constexpr bool Token::isNumericLiteral() const {
-    return type == CHAR || type == NUMBER || type == BOOL;
-}
-
-constexpr bool Token::isArgument() const {
-    return type == VARIABLE || isNumericLiteral();
-}
-
-constexpr bool Token::isLiteral() const {
-    return type == STRING || isNumericLiteral();
-}
-
-constexpr bool Token::isInstruction() const {
-    return type == INSTRUCTION || type == MEMSET;
-}
-
 Token Tokenizer::next() {
     setUpcoming();
     isUpcomingCurrent_ = false;

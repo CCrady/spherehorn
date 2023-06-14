@@ -31,10 +31,18 @@ struct Token {
     TokenType type;
     std::string str;
     Token(TokenType _type = END, std::string _str = ""): type(_type), str(_str) {}
-    constexpr bool isNumericLiteral() const;
-    constexpr bool isArgument() const;
-    constexpr bool isLiteral() const;
-    constexpr bool isInstruction() const;
+    constexpr bool isNumericLiteral() const {
+        return type == CHAR || type == NUMBER || type == BOOL;
+    }
+    constexpr bool isArgument() const {
+        return type == VARIABLE || isNumericLiteral();
+    }
+    constexpr bool isLiteral() const {
+        return type == STRING || isNumericLiteral();
+    }
+    constexpr bool isInstruction() const {
+        return type == INSTRUCTION || type == MEMSET;
+    }
 };
 
 class Tokenizer {

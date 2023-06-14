@@ -8,9 +8,9 @@
 namespace spherehorn {
 
 struct ProgramState {
-    num accRegister;
-    bool condRegister;
-    MemoryCell* memoryPtr;
+    num accRegister = 0;
+    bool condRegister = false;
+    MemoryCell* memoryPtr = nullptr;
 };
 
 }

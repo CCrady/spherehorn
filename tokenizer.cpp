@@ -22,6 +22,14 @@ namespace {
         return isspace(ch) || isGrouping(ch) || isInstructionTerminator(ch) || ch == '#';
     }
 
+    constexpr bool isStringTerminator(char ch) {
+        return ch == '\"' || ch == '\n';
+    }
+
+    constexpr bool isCharTerminator(char ch) {
+        return ch == '\'' || ch == '\n';
+    }
+
     constexpr bool isVariableCh(char ch) {
         return ch == 'a' || ch == 'm';
     }
@@ -104,7 +112,7 @@ void Tokenizer::setUpcoming() {
         case Token::NUMBER:
         case Token::INSTRUCTION:
             str_.put(ch);
-            while (!isWordTerminator(input_.peek())) {
+            while (!isEnd() && !isWordTerminator(input_.peek())) {
                 str_.put(getCh());
             }
             break;
@@ -117,7 +125,7 @@ void Tokenizer::setUpcoming() {
                 if (ch == '\\') {
                     str_.put(getCh());
                 }
-            } while (ch != '\'');
+            } while (!isCharTerminator(ch) && !isEnd());
             break;
         case Token::STRING:
             str_.put(ch);
@@ -128,7 +136,7 @@ void Tokenizer::setUpcoming() {
                 if (ch == '\\') {
                     str_.put(getCh());
                 }
-            } while (ch != '\"');
+            } while (!isStringTerminator(ch) && !isEnd());
             break;
         case Token::END:
             break;

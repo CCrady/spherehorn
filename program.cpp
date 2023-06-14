@@ -52,7 +52,7 @@ Program::Program(std::istream& input) : tokens_(input) {
         }
     }
 
-    state_.memoryPtr = memory_->getChild();
+    if (memory_) state_.memoryPtr = memory_->getChild();
     Arguments::Argument::setStatePtr(&state_);
 }
 
@@ -384,6 +384,18 @@ inline num Program::parseNumber() {
 unsigned char Program::parseChar() {
     const Token token = tokens_.next();
     if (token.type != Token::CHAR) throw std::runtime_error("token is not of type CHAR");
+    if (token.str.back() != '\'') {
+        isParseError_ = true;
+        std::cerr << "Parse error: character literal is not closed (line " << tokens_.line() << ")\n"
+                     " -> Hint: did you forget a `\'`?" << std::endl;
+        return 0;
+    }
+    if (token.str.size() < 3) {
+        isParseError_ = true;
+        std::cerr << "Parse error: character literal is too short (line " << tokens_.line() << ")" << std::endl;
+        return 0;
+    }
+
     // first character is an apostrophe
     unsigned char firstCh = token.str.at(1);
     if (firstCh != '\\') return firstCh;
@@ -394,6 +406,13 @@ unsigned char Program::parseChar() {
 string Program::parseString() {
     const Token token = tokens_.next();
     if (token.type != Token::STRING) throw std::runtime_error("token is not of type STRING");
+    if (token.str.back() != '\"') {
+        isParseError_ = true;
+        std::cerr << "Parse error: string literal is not closed (line " << tokens_.line() << ")\n"
+                     " -> Hint: did you forget a `\"`?" << std::endl;
+        return "";
+    }
+
     std::stringstream outStr;
     // first and last characters are quotation marks
     for (unsigned int i = 1; i < token.str.size() - 1; i++) {
@@ -440,6 +459,7 @@ constexpr char Program::parseEscape(char ch) {
         case 'f':
             return '\f';
         case 'n':
+        case '\n':
             return '\n';
         case 'r':
             return 'r';

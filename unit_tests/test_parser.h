@@ -49,6 +49,9 @@ void testParser() {
         "{ !"
         "    numout"
         "    A m"
+        "    { ?"
+        "        + 5"
+        "    }"
         "    ++"
         "    .a"
         "    >= 20; ^?"
@@ -62,6 +65,48 @@ void testParser() {
     assert(prog2.isParseError(), == false);
     prog2.run();
     assert(fromCout.str(), == "012345678910111213141516171819");
+
+    name = "Acc/cond initial values";
+    stringstream str3 (
+        "a: 'c' "
+        "c: 0b1010 "
+        "{break} "
+        "(0) "
+    );
+    Program prog3 (str3);
+    assert(prog3.isParseError(), == false);
+    assert(prog3.state_.accRegister, == 'c');
+    assert(prog3.state_.condRegister, == true);
+
+    name = "Parse error: unterminated";
+    fromCerr.str("");
+    stringstream str4 (
+        "(0)"
+        "{"
+        "    break"
+    );
+    Program prog4 (str4);
+    assert(prog4.isParseError(), == true);
+    assert(fromCerr.str(), .find("Parse error:") == 0);
+    fromCerr.str("");
+    stringstream str5 (
+        "{break}"
+        "("
+        "    0"
+    );
+    Program prog5 (str5);
+    assert(prog5.isParseError(), == true);
+    assert(fromCerr.str(), .find("Parse error:") == 0);
+    fromCerr.str("");
+    stringstream str6 (
+        "{break}"
+        "("
+        "    \"foo\n"
+        ")"
+    );
+    Program prog6 (str6);
+    assert(prog6.isParseError(), == true);
+    assert(fromCerr.str(), .find("Parse error:") == 0);
 
     endGroup();
 }

@@ -226,6 +226,10 @@ MemoryCell* MemoryCell::shiftForward(num n) {
     return curr;
 }
 
+void MemoryCell::makeFirst() {
+    getParent()->firstChild = this;
+}
+
 MemoryCell* MemoryCell::insertBefore(num _value) {
     MemoryCell* newCell = new MemoryCell(_value);
     MemoryCell* prevCell = getPrev();

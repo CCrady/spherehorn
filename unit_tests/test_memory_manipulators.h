@@ -82,6 +82,33 @@ void testMemoryManipulatorInstructions() {
     assertOkay(memfwd6);
     assert(state.memoryPtr, == &mainChild);
 
+    name = "Memory Restart";
+    resetState(state, mainChild);
+    Instructions::MemoryRestart memrestart (Condition::ALWAYS);
+    assertOkay(memrestart);
+    assert(state.memoryPtr, == &mainChild);
+    resetState(state, nextChild);
+    assertOkay(memrestart);
+    assert(state.memoryPtr, == &mainChild);
+    resetState(state, prevChild);
+    assertOkay(memrestart);
+    assert(state.memoryPtr, == &mainChild);
+
+    name = "Memory Rotate";
+    resetState(state, mainChild);
+    Instructions::MemoryRotate memrotate (Condition::ALWAYS);
+    assertOkay(memrotate);
+    assert(cell.getChild(), == &mainChild);
+    resetState(state, nextChild);
+    assertOkay(memrotate);
+    assert(cell.getChild(), == &nextChild);
+    resetState(state, prevChild);
+    assertOkay(memrotate);
+    assert(cell.getChild(), == &prevChild);
+    resetState(state, prevChild);
+    assertOkay(memrotate);
+    assert(cell.getChild(), == &prevChild);
+
     name = "Memory setter";
     resetState(state, cell);
     MemoryCell setCell (4);

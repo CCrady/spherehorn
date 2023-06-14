@@ -39,6 +39,7 @@ public:
     constexpr MemoryCell* getParent() const { return parent; }
     MemoryCell* shiftBack(num n);
     MemoryCell* shiftForward(num n);
+    void makeFirst();
     // Construct a new memory cell with the given value and insert it just before/after this cell.
     // Return a pointer to the new cell.
     MemoryCell* insertBefore(num _value = 0);

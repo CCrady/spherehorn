@@ -122,4 +122,14 @@ impl(MemoryNext) {
     return Status::OKAY;
 }
 
+impl(MemoryRestart) {
+    state.memoryPtr = state.memoryPtr->getParent()->getChild();
+    return Status::OKAY;
+}
+
+impl(MemoryRotate) {
+    state.memoryPtr->makeFirst();
+    return Status::OKAY;
+}
+
 #undef impl

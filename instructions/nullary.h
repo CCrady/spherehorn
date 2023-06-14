@@ -36,6 +36,8 @@ namespace Instructions {
     decl(MemoryDown);
     decl(MemoryPrev);
     decl(MemoryNext);
+    decl(MemoryRestart);
+    decl(MemoryRotate);
 }
 
 }

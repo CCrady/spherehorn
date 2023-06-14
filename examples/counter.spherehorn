@@ -1,0 +1,25 @@
+# counter.spherehorn
+# This program prints the integers starting from zero and counting up, with each on a new line
+
+{
+    numin # get user input and store it in the first cell
+    > # move to the output number's cell
+    {
+        .a # set the memory cell to the current number so that we can print it
+        numout # print the number
+        > # move to the location of the newline character
+        chout # print a newline
+        > # move to the location of the input number
+        >= m; break? # if the accumulator is >= the input number, exit
+        > # move back to the cell containing the output number
+        ++ # increment the accumulator
+    }
+    break # so that the program ends here
+}
+
+(
+    0 # input number
+    0 # output number
+    '\n'
+)
+

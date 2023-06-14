@@ -1,0 +1,16 @@
+# truth_machine.spherehorn
+
+{
+    numin # get user input
+    numout # print user input
+    C m # did the user enter a truthy number?
+    { ? # if so...
+        numout # print the user input in an infinite loop
+    }
+    break # otherwise end the program
+}
+
+(
+    0
+)
+

@@ -1,0 +1,11 @@
+# hello_world.spherehorn
+
+{
+    strout # print the current memory cell as a string
+    break # break out of the current loop, thus ending the program
+}
+
+(
+    "Hello, World!\n"
+)
+

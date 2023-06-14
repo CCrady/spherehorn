@@ -1,0 +1,54 @@
+# fizzbuzz.spherehorn
+
+{
+    > 2
+    numin # get fizz number
+    # if the user input 0, print an error message and end the program
+    A m = 0
+    ."Fizz num must not be 0!\n"? strout? break?
+    >
+    numin # get buzz number
+    # if the user input 0, print an error message and end the program
+    A m = 0
+    ."Buzz num must not be 0!\n"? strout? break?
+    >
+    numin # get max count
+
+    {
+        # increment cell 0
+        R; A m ++
+        .a
+        # if a is divisible by cell 2, print "fizz" and set cell 1 to false
+        > 2; % m = 0
+        > 3; strout?
+        R >; .F?
+        # if a is divisible by cell 3, print "buzz" and set cell 1 to false
+        R; A m
+        > 3; % m = 0
+        > 3; strout?
+        R >; .F?
+        # if cell 1 is true (i.e. we didn't print "fizz" or "buzz") print the numerical value of cell 0
+        R >; C m
+        R; numout?
+        # print a newline
+        <; chout
+        # if we've reached the value of cell 4, exit
+        R; A m
+        > 4; >= m
+        ^?
+        # reset the value of cell 1 to true
+        R >; .T
+    }
+}
+
+(
+    0 # counter
+    T # should we print a number?
+    0 # the fizz number
+    0 # the buzz number
+    0 # the number to go until
+    "fizz"
+    "buzz"
+    '\n'
+)
+

@@ -1,0 +1,33 @@
+# bottles_of_beer.spherehorn
+
+{
+    numin
+    A m # load accumulator with the input number
+    {
+        R; numout
+        >; strout
+        >; /= 1; chout? # unless acc is 1, print a pluralizing 's'
+        >; strout
+        R; numout
+        >; strout;
+        >; /= 1; chout? # unless acc is 1, print a pluralizing 's'
+        > 2; strout
+        R; -- .a # decrement input cell
+        numout
+        >; strout
+        >; /= 1; chout? # unless acc is 1, print a pluralizing 's'
+        > 3; strout
+        = 0; break?
+    }
+    break
+}
+
+(
+    0 # user input
+    " bottle"
+    's'
+    " of beer on the wall,\n"
+    " of beer;\nTake one down, pass it around,\n"
+    " of beer on the wall.\n\n"
+)
+

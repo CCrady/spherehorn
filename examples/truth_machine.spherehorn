@@ -1,4 +1,7 @@
 # truth_machine.spherehorn
+#
+# This program implements a truth machine, a simple machine commonly used to
+# test esolangs. See https://esolangs.org/wiki/Truth-machine
 
 {
     numin # get user input

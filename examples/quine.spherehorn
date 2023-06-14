@@ -1,0 +1,31 @@
+# quine.spherehorn
+#
+# Note that this file isn't technically a quine, since it differs from its
+# output in comments, whitespace, and instruction terminators, but its
+# output when run is a quine. So e.g. if you run:
+#   $ spherehorn.exe quine.spherehorn > quine1.spherehorn
+#   $ spherehorn.exe quine1.spherehorn > quine2.spherehorn
+#   $ diff quine1.spherehorn quine2.spherehorn
+# you'll find that the diff is empty.
+
+{
+       strout # {...}(
+    >; chout  # "
+    R; strout # {...}(
+    >; chout  # "
+       numout # 34
+    >; chout  # <space>
+       numout # 32
+       chout  # <space>
+    >; numout # 41
+       chout  # )
+    ^ # halt (fewer chars than 'break')
+}
+
+(
+    "{strout;> chout;R strout;> chout;numout;> chout;numout;chout;> numout;chout;^}("
+    34 # ascii code for "
+    32 # ascii code for space
+    41 # ascii code for )
+)
+

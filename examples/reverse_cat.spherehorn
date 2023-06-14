@@ -1,0 +1,26 @@
+# reverse_cat.spherehorn
+#
+# This program takes a line of input and prints it backwards. It exits if it
+# ever comes across an empty line.
+
+{
+    strin # get user input
+    A m # set accumulator to the length of the input string
+    = 0; break? # if the input was empty, halt
+    v # descend into the input string
+    {
+        < # go to the previous cell
+        chout # output the string there
+        -- # decrement accumulator; accumulator represents the number of characters we have yet to print
+        = 0; break? # if we've printed the entire string, break out of the loop
+    }
+    ^ # ascend back to the top level
+    >; chout # print newline for cleanness
+    < # reset the memory pointer back to the input cell
+}
+
+(
+    0 # cell to hold user input
+    '\n'
+)
+

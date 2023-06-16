@@ -132,4 +132,36 @@ impl(MemoryRotate) {
     return Status::OKAY;
 }
 
+impl(InsertBefore) {
+    state.memoryPtr = state.memoryPtr->insertBefore();
+    return Status::OKAY;
+}
+
+impl(InsertAfter) {
+    state.memoryPtr = state.memoryPtr->insertAfter();
+    return Status::OKAY;
+}
+
+impl(DeleteBefore) {
+    if (state.memoryPtr->getParent()->getVal() == 1) {
+        state.memoryPtr = state.memoryPtr->getParent();
+        state.memoryPtr->setVal(0);
+        if (state.memoryPtr->isTop()) return Status::EXIT;
+    } else {
+        state.memoryPtr = state.memoryPtr->deleteBefore();
+    }
+    return Status::OKAY;
+}
+
+impl(DeleteAfter) {
+    if (state.memoryPtr->getParent()->getVal() == 1) {
+        state.memoryPtr = state.memoryPtr->getParent();
+        state.memoryPtr->setVal(0);
+        if (state.memoryPtr->isTop()) return Status::EXIT;
+    } else {
+        state.memoryPtr = state.memoryPtr->deleteAfter();
+    }
+    return Status::OKAY;
+}
+
 #undef impl

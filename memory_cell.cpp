@@ -247,6 +247,30 @@ MemoryCell* MemoryCell::insertAfter(num _value) {
     return newCell;
 }
 
+MemoryCell* MemoryCell::deleteBefore() {
+    MemoryCell* prevCell = getPrev();
+    MemoryCell* nextCell = getNext();
+    prevCell->linkNext(nextCell);
+    parent->value--;
+    parent->numChildrenInstantiated--;
+    if (parent->firstChild == this)
+        parent->firstChild = prevCell;
+    delete this; // TODO: this isn't great practice
+    return prevCell;
+}
+
+MemoryCell* MemoryCell::deleteAfter() {
+    MemoryCell* prevCell = getPrev();
+    MemoryCell* nextCell = getNext();
+    prevCell->linkNext(nextCell);
+    parent->value--;
+    parent->numChildrenInstantiated--;
+    if (parent->firstChild == this)
+        parent->firstChild = nextCell;
+    delete this; // TODO: this isn't great practice
+    return nextCell;
+}
+
 void MemoryCell::insertChild(MemoryCell* newChild) {
     if (value == 0) {
         this->firstChild = newChild;

@@ -44,6 +44,10 @@ public:
     // Return a pointer to the new cell.
     MemoryCell* insertBefore(num _value = 0);
     MemoryCell* insertAfter(num _value = 0);
+    // Destroy this memory cell and return a pointer to the one just before/after it. The caller
+    // must make sure that this cell has at least one sibling (i.e. the parent's value is >= 2).
+    MemoryCell* deleteBefore();
+    MemoryCell* deleteAfter();
     // Insert child as the last child of this memory cell
     void insertChild(MemoryCell* child);
     // Recursively make copies of all of other's children and set them as children of this

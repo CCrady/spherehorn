@@ -38,6 +38,11 @@ namespace Instructions {
     decl(MemoryNext);
     decl(MemoryRestart);
     decl(MemoryRotate);
+
+    decl(InsertBefore);
+    decl(InsertAfter);
+    decl(DeleteBefore);
+    decl(DeleteAfter);
 }
 
 }

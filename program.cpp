@@ -247,6 +247,14 @@ inline instr_ptr Program::parseNullaryInstruction(const Token& code) {
         instr.reset(new Instructions::MemoryRestart(condition));
     } else if (code.str == "rot") {
         instr.reset(new Instructions::MemoryRotate(condition));
+    } else if (code.str == "<+") {
+        instr.reset(new Instructions::InsertBefore(condition));
+    } else if (code.str == "+>") {
+        instr.reset(new Instructions::InsertAfter(condition));
+    } else if (code.str == "<-") {
+        instr.reset(new Instructions::DeleteBefore(condition));
+    } else if (code.str == "->") {
+        instr.reset(new Instructions::DeleteAfter(condition));
     } else {
         std::cerr << "Parse error: unrecognized nullary instruction `" << code.str << "` "
                      "(line " << tokens_.line() << ")" << std::endl;

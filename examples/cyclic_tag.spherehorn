@@ -1,0 +1,51 @@
+# cyclic_tag.spherehorn
+#
+# This program emulates an arbitrary cyclic tag machine. Change the memory below
+# to change the initial state and rules of the machine. Because cyclic tag
+# machines are Turing-complete, this shows that Spherehorn is Turning-complete.
+#
+# See https://esolangs.org/wiki/Cyclic_tag_system
+
+(
+    # the inital string D
+    ( 1 )
+    # the list of productions P
+    (
+        ( 1 1 0 0 )
+        ( 1 0 0 )
+        ( 0 1 0 0 )
+        ( 0 )
+        ( 0 1 )
+    )
+    '\n'
+)
+
+{
+    R; A m
+    v { # print each character in the string
+        numout
+        --
+        = 0; break?
+        >
+    }
+    R; C m # if the first element of D is 1
+    ^ > v # move to the current production in P
+    A m # set the accumulator to the length of the production for the loop
+    v { ? # append the production to the string
+        C m # set the conditional to the current production symbol
+        ^ ^ < v # move into the string
+        <+ # insert a 0 at the end of the string
+        .1? # set the new 0 to 1 iff the conditional was true
+        ^ > v v # move back into the current production
+        > rot # move the starting position over by one
+        -- # decrement the accumulator, since we just copied a symbol
+        = 0; break? # if we've copied the entire production, stop looping
+    } ^
+    > rot # make the next production current
+    ^ >; chout # print a newline
+    > v; -> # remove the first symbol of the string and move to the next one
+    # if the string is now empty, the '->' put us at the top-level memory loop
+    # if the string isn't empty, we're still inside its loop
+    ^ # this will halt the program iff the string is empty
+}
+

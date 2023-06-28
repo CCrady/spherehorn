@@ -33,19 +33,48 @@ Status Program::run() {
 }
 
 Program::Program(std::istream& input) : tokens_(input) {
+    bool seenInstructionBlock = false;
+    bool seenMemoryBlock = false;
+    bool seenInitialAccumulator = false;
+    bool seenInitialConditional = false;
+
     for (Token token = tokens_.peek();
          !tokens_.isEnd();
          token = tokens_.peek()) {
-        if (token.str == "{" && !instrs_) {
+        if (token.str == "{") {
+            if (seenInstructionBlock) {
+                std::cerr << "Parse error: more than one instruction block at top-level scope "
+                             "(line " << tokens_.line() << ")" << std::endl;
+                isParseError_ = true;
+            }
             instrs_ = std::move(parseInstructionBlock());
-        } else if (token.str == "(" && !memory_) {
+            seenInstructionBlock = true;
+        } else if (token.str == "(") {
+            if (seenMemoryBlock) {
+                std::cerr << "Parse error: more than one memory block at top-level scope "
+                             "(line " << tokens_.line() << ")" << std::endl;
+                isParseError_ = true;
+            }
             memory_.reset(parseMemory());
+            seenMemoryBlock = true;
         } else if (token.str == "a:") {
+            if (seenInitialAccumulator) {
+                std::cerr << "Parse error: more than one initial accumulator value "
+                             "(line " << tokens_.line() << ")" << std::endl;
+                isParseError_ = true;
+            }
             state_.accRegister = parseInitialAccumulator();
+            seenInitialAccumulator = true;
         } else if (token.str == "c:") {
+            if (seenInitialConditional) {
+                std::cerr << "Parse error: more than one initial conditional value "
+                             "(line " << tokens_.line() << ")" << std::endl;
+                isParseError_ = true;
+            }
             state_.condRegister = parseInitialConditional();
+            seenInitialConditional = true;
         } else {
-            std::cerr << "Parse error: invalid root token `" << token.str << "` "
+            std::cerr << "Parse error: invalid token at top-level scope `" << token.str << "` "
                          "(line " << tokens_.line() << ")" << std::endl;
             isParseError_ = true;
             tokens_.discard();

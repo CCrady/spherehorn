@@ -43,10 +43,10 @@ private:
     Condition parseCondition();
     inline num parseNumericLiteral();
     inline num parseNumber();
-    unsigned char parseChar();
-    std::string parseString();
+    num parseChar();
+    MemoryCell* parseString();
     inline bool parseBool();
-    constexpr char parseEscape(char ch);
+    inline num parseEscape(const char*& escape);
     inline num parseInitialAccumulator();
     inline num parseInitialConditional();
 };

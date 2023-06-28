@@ -16,7 +16,7 @@ void testParser() {
         "("
         "    0xdeadbeef"
         "    '\\n'"
-        "    \"FOO\""
+        "    \"FOO\x7e\""
         "    ("
         "        4"
         "        0b1010"
@@ -32,7 +32,7 @@ void testParser() {
     MemoryCell parent;
     MemoryCell* child1 = new MemoryCell(0xdeadbeef);
     MemoryCell* child2 = new MemoryCell('\n');
-    MemoryCell* child3 = new MemoryCell("FOO");
+    MemoryCell* child3 = new MemoryCell("FOO~");
     MemoryCell* child4 = new MemoryCell();
     MemoryCell* grandchild1 = new MemoryCell(4);
     MemoryCell* grandchild2 = new MemoryCell(0b1010);

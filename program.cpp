@@ -138,7 +138,7 @@ inline MemoryCell* Program::parseLiteral() {
     case Token::CHAR:
         return new MemoryCell(parseChar());
     case Token::STRING:
-        return new MemoryCell(parseString());
+        return parseString();
     case Token::BOOL:
         return new MemoryCell(parseBool());
     default:
@@ -224,11 +224,11 @@ inline instr_ptr Program::parseMemorySetter(const Token& code) {
         Condition condition = parseCondition();
         return instr_ptr(new Instructions::SetMemoryVal(condition, arg));
     } else if (value.type == Token::STRING) {
-        MemoryCell cell (parseString());
+        MemoryCell& cell = *parseString();
         Condition condition = parseCondition();
         return instr_ptr(new Instructions::SetMemory(condition, std::move(cell)));
     } else if (value.str == "(") {
-        MemoryCell cell (*parseMemory());
+        MemoryCell& cell = *parseMemory();
         Condition condition = parseCondition();
         return instr_ptr(new Instructions::SetMemory(condition, std::move(cell)));
     } else {
@@ -410,57 +410,59 @@ inline num Program::parseNumber() {
         }
     }
     const char* stringBegin = token.str.data();
-    const char* stringEnd = stringBegin + token.str.size();
+    const char* const stringEnd = stringBegin + token.str.size();
     if (skipFirstTwo) stringBegin += 2;
-    num result = 0;
-    // TODO: parse error if the number is ill-formed
-    std::from_chars(stringBegin, stringEnd, result, base);
-    return result;
+    num value = 0;
+    auto result = std::from_chars(stringBegin, stringEnd, value, base);
+    if (result.ptr != stringEnd) {
+        std::cerr << "Parse error: invalid integer literal `" << token.str << "` "
+                     "(line " << tokens_.line() << ")" << std::endl;
+        isParseError_ = true;
+    }
+    return value;
 }
 
-unsigned char Program::parseChar() {
+num Program::parseChar() {
     const Token token = tokens_.next();
     if (token.type != Token::CHAR) throw std::runtime_error("token is not of type CHAR");
     if (token.str.back() != '\'') {
         isParseError_ = true;
-        std::cerr << "Parse error: character literal is not closed (line " << tokens_.line() << ")\n"
+        std::cerr << "Parse error: character literal `" << token.str << "` is not closed (line " << tokens_.line() << ")\n"
                      " -> Hint: did you forget a `\'`?" << std::endl;
         return 0;
     }
     if (token.str.size() < 3) {
         isParseError_ = true;
-        std::cerr << "Parse error: character literal is too short (line " << tokens_.line() << ")" << std::endl;
+        std::cerr << "Parse error: character literal is empty (line " << tokens_.line() << ")" << std::endl;
         return 0;
     }
 
     // first character is an apostrophe
-    unsigned char firstCh = token.str.at(1);
-    if (firstCh != '\\') return firstCh;
-    unsigned char secondCh = token.str.at(2);
-    return parseEscape(secondCh);
+    const char* charStart = token.str.data() + 1;
+    if (*charStart != '\\') return *charStart;
+    return parseEscape(charStart);
 }
 
-string Program::parseString() {
+MemoryCell* Program::parseString() {
     const Token token = tokens_.next();
     if (token.type != Token::STRING) throw std::runtime_error("token is not of type STRING");
+
+    MemoryCell* result = new MemoryCell();
     if (token.str.back() != '\"') {
         isParseError_ = true;
-        std::cerr << "Parse error: string literal is not closed (line " << tokens_.line() << ")\n"
+        std::cerr << "Parse error: string literal `" << token.str << "` is not closed (line " << tokens_.line() << ")\n"
                      " -> Hint: did you forget a `\"`?" << std::endl;
-        return "";
+        return result;
     }
-
-    std::stringstream outStr;
     // first and last characters are quotation marks
-    for (unsigned int i = 1; i < token.str.size() - 1; i++) {
-        if (token.str.at(i) == '\\') {
-            i++;
-            outStr.put(parseEscape(token.str.at(i)));
-        } else {
-            outStr.put(token.str.at(i));
-        }
+    const char* const stringBegin = token.str.data() + 1;
+    const char* const stringEnd = token.str.data() + token.str.size() - 1;
+
+    for (const char* stringPos = stringBegin; stringPos != stringEnd; stringPos++) {
+        num charValue = *stringPos == '\\' ? parseEscape(stringPos) : *stringPos;
+        result->insertChild(new MemoryCell(charValue));
     }
-    return outStr.str();
+    return result;
 }
 
 inline bool Program::parseBool() {
@@ -470,43 +472,63 @@ inline bool Program::parseBool() {
     return token.str == "T";
 }
 
-constexpr char Program::parseEscape(char ch) {
-    switch (ch) {
-        case '\\':
-            return '\\';
-        case '\'':
-            return '\'';
-        case '\"':
-            return '\"';
-        case ';':
-            return ';';
-        case '?':
-            return '?';
-        case ' ':
-        case 's':
-            return ' ';
-        case '0':
-            return '\0';
-        case 'a':
-            return '\a';
-        case 'b':
-            return '\b';
-        case 'e':
-            return '\u001b';
-        case 'f':
-            return '\f';
-        case 'n':
-        case '\n':
-            return '\n';
-        case 'r':
-            return 'r';
-        case 't':
-            return '\t';
-        case 'v':
-            return '\v';
-        // TODO: better solution
-        default:
-            return ch;
+inline num Program::parseEscape(const char*& escape) {
+    if (*escape != '\\') throw std::runtime_error("escape does not start with `\\`");
+    escape++;
+    char escapeChar = *escape;
+
+    switch (escapeChar) {
+    case '\\':
+        return '\\';
+    case '\'':
+        return '\'';
+    case '\"':
+        return '\"';
+    case ';':
+        return ';';
+    case '?':
+        return '?';
+    case ' ':
+    case 's':
+        return ' ';
+    case '0':
+        return '\0';
+    case 'a':
+        return '\a';
+    case 'b':
+        return '\b';
+    case 'e':
+        return '\u001b';
+    case 'f':
+        return '\f';
+    case 'n':
+    case '\n':
+        return '\n';
+    case 'r':
+        return '\r';
+    case 't':
+        return '\t';
+    case 'v':
+        return '\v';
+    case 'x': {
+        num value = 0;
+        const char* const numBegin = escape + 1;
+        const char* const numEnd = escape + 3;
+        auto result = std::from_chars(numBegin, numEnd, value, 16);
+        if (result.ptr != numEnd) {
+            std::cerr << "Parse error: invalid character escape sequence `\\" << escapeChar << *numBegin << *(numBegin + 1) << "` "
+                         "(line " << tokens_.line() << ")\n"
+                         " -> Hint: ascii escape sequences must be of the form `\\xHH`, where H are hexadecimal digits" << std::endl;
+            isParseError_ = true;
+        }
+        escape += 2;
+        return value;
+    }
+    default:
+        std::cerr << "Parse error: invalid character escape sequence `\\" << escapeChar << "` "
+                     "(line " << tokens_.line() << ")" << std::endl;
+        isParseError_ = true;
+        return 0;
     }
 }
 

@@ -58,7 +58,7 @@ impl(InputString) {
 
     MemoryCell* currChild = state.memoryPtr->getChild();
     for (auto it = inString.begin(); it != inString.end(); ++it) {
-        currChild->setVal(*it);
+        currChild->setVal(static_cast<num>(*it));
         currChild = currChild->getNext();
     }
     return Status::OKAY;

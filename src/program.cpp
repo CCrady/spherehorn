@@ -443,7 +443,7 @@ num Program::parseChar() {
 
     // first character is an apostrophe
     const char* charStart = token.str.data() + 1;
-    if (*charStart != '\\') return *charStart;
+    if (*charStart != '\\') return static_cast<num>(*charStart);
     return parseEscape(charStart);
 }
 
@@ -463,7 +463,7 @@ MemoryCell* Program::parseString() {
     const char* const stringEnd = token.str.data() + token.str.size() - 1;
 
     for (const char* stringPos = stringBegin; stringPos != stringEnd; stringPos++) {
-        num charValue = *stringPos == '\\' ? parseEscape(stringPos) : *stringPos;
+        num charValue = *stringPos == '\\' ? parseEscape(stringPos) : static_cast<num>(*stringPos);
         result->insertChild(new MemoryCell(charValue));
     }
     return result;

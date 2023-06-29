@@ -12,7 +12,7 @@ MemoryCell::MemoryCell(const string& str) : value(str.size()) {
 
     MemoryCell* currChild = getChild();
     for (unsigned int i = 0; i < str.size(); i++) {
-        currChild->setVal(str.at(i));
+        currChild->setVal(static_cast<num>(str.at(i)));
         currChild = currChild->getNext();
     }
 }

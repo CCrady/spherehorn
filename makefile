@@ -9,8 +9,8 @@ TESTDIR := test_objs
 
 # compiler flags
 CXXVERSION := -std=c++20
-WARNINGS := -Wall -Wextra -Wpedantic -Wcast-qual -Wcast-align=strict -Wctor-dtor-privacy -Winit-self -Wuninitialized -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=4 -Wundef -Winline -Wstack-protector -Wzero-as-null-pointer-constant -Wuseless-cast
-BUILDFLAGS := $(CXXVERSION) $(WARNINGS) -o3 -flto
+WARNINGS := -Wall -Wextra -Wpedantic -Wcast-qual -Wcast-align=strict -Wctor-dtor-privacy -Winit-self -Wuninitialized -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=4 -Wundef -Wstack-protector -Wzero-as-null-pointer-constant -Wuseless-cast
+BUILDFLAGS := $(CXXVERSION) $(WARNINGS) -O2 -flto
 TESTFLAGS := $(CXXVERSION) $(WARNINGS) -g3 -fsanitize=address -fstack-protector-all
 
 # Primary commands:

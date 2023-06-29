@@ -146,7 +146,7 @@ inline MemoryCell* Program::parseLiteral() {
     }
 }
 
-inline num Program::parseNumericLiteral() {
+num Program::parseNumericLiteral() {
     Token token = tokens_.peek();
     switch (token.type) {
     case Token::NUMBER:
@@ -215,7 +215,7 @@ inline instr_ptr Program::parseInstruction() {
     return parseNullaryInstruction(code);
 }
 
-inline instr_ptr Program::parseMemorySetter(const Token& code) {
+instr_ptr Program::parseMemorySetter(const Token& code) {
     if (code.type != Token::MEMSET) throw std::runtime_error("code of memory setter is not of type Token::MEMSET");
 
     Token value = tokens_.peek();
@@ -243,7 +243,7 @@ inline instr_ptr Program::parseMemorySetter(const Token& code) {
     }
 }
 
-inline instr_ptr Program::parseNullaryInstruction(const Token& code) {
+instr_ptr Program::parseNullaryInstruction(const Token& code) {
     if (code.type != Token::INSTRUCTION) throw std::runtime_error("code of instruction is not of type Token::INSTRUCTION");
 
     Condition condition = parseCondition();
@@ -295,7 +295,7 @@ inline instr_ptr Program::parseNullaryInstruction(const Token& code) {
     return instr;
 }
 
-inline instr_ptr Program::parseUnaryInstruction(const Token& code) {
+instr_ptr Program::parseUnaryInstruction(const Token& code) {
     if (code.type != Token::INSTRUCTION) throw std::runtime_error("code of instruction is not of type Token::INSTRUCTION");
 
     arg_ptr arg = parseArgument();
@@ -389,7 +389,7 @@ Condition Program::parseCondition() {
     }
 }
 
-inline num Program::parseNumber() {
+num Program::parseNumber() {
     const Token token = tokens_.next();
     int base = 10;
     bool skipFirstTwo = false;
@@ -476,7 +476,7 @@ inline bool Program::parseBool() {
     return token.str == "T";
 }
 
-inline num Program::parseEscape(const char*& escape) {
+num Program::parseEscape(const char*& escape) {
     if (*escape != '\\') throw std::runtime_error("escape does not start with `\\`");
     escape++;
     char escapeChar = *escape;

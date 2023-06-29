@@ -1,8 +1,8 @@
 // test_memory_manipulators.h
 
-#include "../program_state.h"
-#include "../memory_cell.h"
-#include "../instructions/instructions.h"
+#include "../src/program_state.h"
+#include "../src/memory_cell.h"
+#include "../src/instructions/instructions.h"
 #include "unit_tests.h"
 
 void testMemoryManipulatorInstructions() {

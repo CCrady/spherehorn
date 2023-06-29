@@ -13,8 +13,8 @@ package manager of choice to install them; with APT,
 `sudo apt install build-essential` works nicely. Once you've `clone`d/downloaded
 this repository, navigate to the root directory (where the `makefile` is) in
 your terminal emulator and run the command `make`. When it's done executing,
-you'll find a new file, `spherehorn.exe`, in the directory. Try running
-`echo "3 5 50" | ./spherehorn.exe examples/fizzbuzz.spherehorn` and see what
+you'll find a new file, `spherehorn`, in the directory. Try running
+`echo "3 5 50" | ./spherehorn examples/fizzbuzz.spherehorn` and see what
 happens.
 ### Others
 If you want to use a different compiler, switch the line `CXX := g++` out in

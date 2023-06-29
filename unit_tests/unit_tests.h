@@ -7,13 +7,13 @@
 #include <sstream>
 // this is terrible but I need to test MemoryCell's internals
 #define private public
-#include "../memory_cell.h"
+#include "../src/memory_cell.h"
 #undef private
-#include "../program_state.h"
-#include "../memory_cell.h"
-#include "../arguments.h"
-#include "../instruction_container.h"
-#include "../tokenizer.h"
+#include "../src/program_state.h"
+#include "../src/memory_cell.h"
+#include "../src/arguments.h"
+#include "../src/instruction_container.h"
+#include "../src/tokenizer.h"
 using namespace spherehorn;
 using namespace std;
 

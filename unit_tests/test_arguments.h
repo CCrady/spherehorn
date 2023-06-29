@@ -1,6 +1,6 @@
 // test_arguments.h
 
-#include "../arguments.h"
+#include "../src/arguments.h"
 #include "unit_tests.h"
 using namespace spherehorn;
 

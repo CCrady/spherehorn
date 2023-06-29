@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "../program_state.h"
-#include "../arguments.h"
-#include "../instructions/instructions.h"
+#include "../src/program_state.h"
+#include "../src/arguments.h"
+#include "../src/instructions/instructions.h"
 #include "unit_tests.h"
 using namespace spherehorn;
 using namespace std;

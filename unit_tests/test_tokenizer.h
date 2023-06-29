@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <stdexcept>
-#include "../tokenizer.h"
+#include "../src/tokenizer.h"
 #include "unit_tests.h"
 using namespace spherehorn;
 

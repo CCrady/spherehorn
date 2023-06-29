@@ -2,9 +2,9 @@
 
 #include <sstream>
 #define private public
-#include "../program.h"
+#include "../src/program.h"
 #undef private
-#include "../memory_cell.h"
+#include "../src/memory_cell.h"
 #include "unit_tests.h"
 using namespace spherehorn;
 

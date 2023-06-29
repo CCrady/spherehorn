@@ -3,10 +3,10 @@
 #pragma once
 
 #include <memory>
-#include "../program_state.h"
-#include "../memory_cell.h"
-#include "../instruction_block.h"
-#include "../instructions/instructions.h"
+#include "../src/program_state.h"
+#include "../src/memory_cell.h"
+#include "../src/instruction_block.h"
+#include "../src/instructions/instructions.h"
 #include "unit_tests.h"
 using namespace spherehorn;
 using namespace std;
@@ -57,7 +57,7 @@ void testControlFlow() {
     block.insertInstr(brk1);
     block.insertInstr(inv1);
     // block is now:
-    // {
+    // { !
     //     dec?
     //     sub 2;
     //     break?

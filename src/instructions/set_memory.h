@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <utility>
 #include "../program_state.h"
 #include "../memory_cell.h"
 #include "../instruction_container.h"
@@ -18,7 +19,7 @@ namespace Instructions {
             value_(value) {}
         SetMemory(Condition condition, MemoryCell&& value) :
             InstructionContainer(condition),
-            value_(value) {}
+            value_(std::move(value)) {}
         ~SetMemory() {}
     protected:
         Status action(ProgramState& state);

@@ -224,13 +224,17 @@ inline instr_ptr Program::parseMemorySetter(const Token& code) {
         Condition condition = parseCondition();
         return instr_ptr(new Instructions::SetMemoryVal(condition, arg));
     } else if (value.type == Token::STRING) {
-        MemoryCell& cell = *parseString();
+        MemoryCell* cell = parseString();
         Condition condition = parseCondition();
-        return instr_ptr(new Instructions::SetMemory(condition, std::move(cell)));
+        instr_ptr result (new Instructions::SetMemory(condition, std::move(*cell)));
+        delete cell; // TODO: this is kind of kludgy
+        return result;
     } else if (value.str == "(") {
-        MemoryCell& cell = *parseMemory();
+        MemoryCell* cell = parseMemory();
         Condition condition = parseCondition();
-        return instr_ptr(new Instructions::SetMemory(condition, std::move(cell)));
+        instr_ptr result (new Instructions::SetMemory(condition, std::move(*cell)));
+        delete cell; // TODO: this is kind of kludgy
+        return result;
     } else {
         std::cerr << "Parse error: invalid memory value for `.` instruction "
                      "(line " << tokens_.line() << ")" << std::endl;

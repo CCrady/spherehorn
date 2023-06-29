@@ -13,6 +13,7 @@ namespace Arguments {
     protected:
         static ProgramState* state;
     public:
+        virtual ~Argument() {}
         virtual num get() = 0;
         static void setStatePtr(ProgramState* _state) { state = _state; }
     };
@@ -22,18 +23,21 @@ namespace Arguments {
         num value = 0;
     public:
         Constant(num _value) : value(_value) {}
+        ~Constant() {}
         num get();
     };
 
     class Accumulator : public Argument {
     public:
         Accumulator() {}
+        ~Accumulator() {}
         num get();
     };
 
     class MemoryCell : public Argument {
     public:
         MemoryCell() {}
+        ~MemoryCell() {}
         num get();
     };
 }

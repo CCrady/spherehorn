@@ -19,7 +19,7 @@ happens.
 ### Others
 If you want to use a different compiler, switch the line `CXX := g++` out in
 `makefile` for whatever you're using. You may also need to alter or remove the
-`CXXFLAGS` line below it. If you'd rather not use `make` or one of its
+`BUILDFLAGS` line below it. If you'd rather not use `make` or one of its
 replacements, compile all the .cpp files in the repositiory together except for
 `unit_tests.cpp`.
 

@@ -22,12 +22,23 @@ void testIOInstructions() {
     assertOkay(chin);
     assert(cell.getVal(), == 'A');
     assert(cin.get(), == 'B');
+    toCin.str("\n\tX");
+    assertOkay(chin);
+    assert(cell.getVal(), == '\n');
+    assert(cin.get(), == '\t');
+    assert(cin.get(), == 'X');
 
     name = "Output Char";
-    fromCout.str("");
+    resetState(state, cell);
+    cell.setVal(static_cast<num>('A'));
     Instructions::OutputChar chout(Condition::ALWAYS);
+    fromCout.str("");
     assertOkay(chout);
     assert(fromCout.str(), == "A");
+    cell.setVal(static_cast<num>('\n'));
+    fromCout.str("");
+    assertOkay(chout);
+    assert(fromCout.str(), == "\n");
     cell.setVal(999999); // not valid ASCII
     assertAbort(chout);
 

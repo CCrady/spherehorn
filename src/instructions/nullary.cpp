@@ -38,9 +38,9 @@ impl(Invert) {
 
 
 impl(InputChar) {
-    unsigned char inChar = 0;
-    std::cin >> inChar;
-    state.memoryPtr->setVal(inChar);
+    char inChar = 0;
+    std::cin.get(inChar);
+    state.memoryPtr->setVal(static_cast<num>(inChar));
     return Status::OKAY;
 }
 

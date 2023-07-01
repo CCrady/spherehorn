@@ -1,0 +1,135 @@
+# brainfuck.spherehorn
+#
+# This program is an interpreter for brainfuck programs.
+
+(
+    # Change the following string to change the program that the interpreter will run.
+    # Hello world program, from https://esolangs.org/wiki/Brainfuck
+    "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
+
+    ( 0 999 ) # the brainfuck memory tape
+              # The value of 999 is there to indicate that we've reached the end of allocated tape
+              # space. Because each cell of a brainfuck program is only a single byte, none of them
+              # will ever have a value of more than 255.
+    0 # working memory
+)
+
+{
+    v <+ # insert a zero at the end of the brainfuck program
+    > # move the memory pointer to the first character of the program
+
+    { # PROGRAM EXECUTION LOOP
+
+        A m = 0; break? # if we've reached the end of the program, halt
+
+        A m = '+'; { ? # if current instruction is '+'...
+            ^ > v # go to tape
+            A m # set accumulator to memory cell
+            = 255; A 0? ++! # if accumulator is 255, overflow to 0; otherwise increment
+            .a # set memory cell to accumulator
+            ^ < v # go to program
+            break
+        }
+
+        A m = '-'; { ? # if current instruction is '-'...
+            ^ > v # go to tape
+            A m # set accumulator to memory cell
+            = 0; A 255? --! # if accumulator is 0, underflow to 255; otherwise decrement
+            .a # set memory cell to accumulator
+            ^ < v # go to program
+            break
+        }
+
+        A m = ','; { ? # if current instruction is ','...
+            ^ > v # go to tape
+            chin # get character from standard input
+            ^ < v # go to program
+            break
+        }
+
+        A m = '.'; { ? # if current instruction is '.'...
+            ^ > v # go to tape
+            chout # print cell as a character to standard output
+            ^ < v # go to program
+            break
+        }
+
+        A m = '<'; { ? # if current instruction is '<'...
+            ^ > v # go to tape
+            < # move to the left
+            A m = 999; +>? # if we've reached the 999 value, insert an extra cell with value 0
+            rot # save the current tape position
+            ^ < v # go to program
+            break
+        }
+
+        A m = '>'; { ? # if current instruction is '>'...
+            ^ > v # go to tape
+            > # move to the right
+            A m = 999; <+? # if we've reached the 999 value, insert an extra cell with value 0
+            rot # save the current tape position
+            ^ < v # go to program
+            break
+        }
+
+        A m = '['; { ? # if current instruction is '['...
+            ^ <; .1 # set working memory to 1
+            < v; C m # is the current memory cell non-zero?
+            ^ < v # go to program
+            { ! # if not (cell was zero)...
+                # Iterate forward through the program. When we encounter a '[', increment working
+                # memory, and when we encounter a ']' decrement it. Loop until working memory is
+                # zero. When we break out of the loop, the current instruction will be the matching
+                # ']' to our '['.
+                > rot # set the next program instruction as current
+                A m # store current instruction in accumulator
+                ^ < # go to working memory
+
+                = '[' # if current instruction is '['...
+                A m? ++? .a? A '['? # increment working memory and set accumulator back to '['
+                = ']' # if current instruction is ']'...
+                A m? --? .a? A ']'? # decrement working memory and set accumulator back to ']'
+
+                A m = 0; # is working memory zero?
+                > v # go to program
+                break? # if so (working memory was zero), break out of the loop
+            }
+            break
+        }
+
+        # If we were just on a '[' instruction and the current memory cell was zero, then we moved
+        # to a ']' instruction, and the condition here will be true. This is not an issue, however,
+        # because ']' is a no-op when the current memory cell is zero, so the following block will
+        # leave the program's state unchanged.
+        A m = ']'; { ? # if current instruction is ']'...
+            ^ <; .1 # set working memory to 1
+            < v; C m # is the current memory cell non-zero?
+            ^ < v # go to program
+            { ? # if so (cell was non-zero)...
+                # Iterate backward through the program. When we encounter a ']', increment working
+                # memory, and when we encounter a '[' decrement it. Loop until working memory is
+                # zero. When we break out of the loop, the current instruction will be the matching
+                # '[' to our ']'.
+                < rot # set the previous program instruction as current
+                A m # store current instruction in accumulator
+                ^ < # go to working memory
+
+                = ']' # if current instruction is ']'...
+                A m? ++? .a? A ']'? # increment working memory and set accumulator back to ']'
+                = '[' # if current instruction is '['...
+                A m? --? .a? A '['? # decrement working memory and set accumulator back to '['
+
+                A m = 0; # is working memory zero?
+                > v # go to program
+                break? # if so (working memory was zero), break out of the loop
+            }
+            break
+        }
+
+        > rot # set next instruction as current
+
+    } #  PROGRAM EXECUTION LOOP
+
+    break
+}
+

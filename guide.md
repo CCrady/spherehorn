@@ -125,7 +125,10 @@ size.
   Memory blocks may not contain anything besides literals.
 - String literals, written like `"FOO"`. A string literal represents a memory
   node whose children are the characters of the string, so the literals `"FOO"`,
-  `('F' 'O' 'O')`, and `(70 79 79)` all mean the same thing.
+  `('F' 'O' 'O')`, and `(70 79 79)` all mean the same thing. String literals can
+  be concatenated together with a `&`, so `"foo" & "bar"` means the same thing
+  as `"foobar"`; this can be used to split a single string across multiple
+  lines.
 
 ### Instructions
 An **instruction** is a bit of Spherehorn code that tells the program to do
@@ -168,12 +171,17 @@ instruction.
 
 ### Program syntax
 Every Spherehorn program must have a [code](#program-code) block containing one
-or more statements, and a [memory](#the-memory-tree) block containing one or
-more memory nodes. These must appear at the top-level scope, i.e. not within any
+or more statements, and a [memory](#the-memory-tree) literal containing one or
+more child nodes. These must appear at the top-level scope, i.e. not within any
 other code or memory blocks, but either one can come first. When the program
 starts executing, control flow will start at the first statement of the
 top-level code block, and the memory pointer will point to the first child of
-the top-level memory block.
+the root memory node.
+
+The memory value defining the start state of program memory is most commonly a
+memory block, but it can in fact be any literal with a value (i.e. number of
+children) of at least one. So `( () )`, `"foo"`, `T`, and `4` are okay, but
+`()`, `""`, `F`, and `0` are not.
 
 A Spherehorn program may optionally specify the initial values of the
 accumulator and conditional registers via the syntax `a: X` and `c: X` (where

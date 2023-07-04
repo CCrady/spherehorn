@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <istream>
+#include <sstream>
 #include <string>
 #include "definitions.h"
 #include "program_state.h"
@@ -12,12 +13,7 @@
 
 namespace spherehorn {
 
-// Parse the program in the input buffer into Instructions and MemoryCells. Pass these back to the
-// caller by mutating the state and instr parameters.
-// The input stream will be read from, and therefore should not be used after the function has
-// finished execution.
 using cell_ptr = std::unique_ptr<MemoryCell>;
-void parse(ProgramState& state, cell_ptr& topCell, instr_ptr& instr, std::istream& input);
 
 class Program {
 private:
@@ -28,27 +24,31 @@ private:
     bool isParseError_ = false;
     bool hasBeenRun_ = false;
 public:
-    Program(std::istream& input);
+    Program(std::istream&& input);
     Status run();
     constexpr bool isParseError() const { return isParseError_; }
 private:
-    MemoryCell* parseMemory();
-    inline MemoryCell* parseLiteral();
+    // For instructions:
     instr_ptr parseInstructionBlock();
-    inline instr_ptr parseInstruction();
+    instr_ptr parseInstruction();
     instr_ptr parseMemorySetter(const Token& code);
     instr_ptr parseNullaryInstruction(const Token& code);
     instr_ptr parseUnaryInstruction(const Token& code);
     arg_ptr parseArgument();
     Condition parseCondition();
-    num parseNumericLiteral();
-    num parseNumber();
-    num parseChar();
-    MemoryCell* parseString();
-    inline bool parseBool();
-    num parseEscape(const char*& escape);
-    inline num parseInitialAccumulator();
-    inline num parseInitialConditional();
+    // For literals:
+    MemoryCell* parseLiteralAsMemory();
+    MemoryCell* parseMemoryBlock();
+    MemoryCell* parseStringLiteral();
+    void parseStringToken(std::stringstream& str, const Token& token);
+    num parseLiteralAsNumber();
+    num parseIntegerLiteral();
+    num parseCharLiteral();
+    char parseChar(const char*& start);
+    bool parseBoolLiteral();
+    // For initial program state:
+    num parseInitialAccumulator();
+    num parseInitialConditional();
 };
 
 }

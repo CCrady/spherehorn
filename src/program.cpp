@@ -5,8 +5,6 @@
 #include <istream>
 #include <sstream>
 #include <charconv>
-#include <vector>
-#include <memory>
 #include <stdexcept>
 #include "definitions.h"
 #include "program_state.h"
@@ -32,9 +30,9 @@ Status Program::run() {
     return exit_status == Status::ABORT ? Status::ABORT : Status::EXIT;
 }
 
-Program::Program(std::istream& input) : tokens_(input) {
+Program::Program(std::istream&& input) : tokens_(std::move(input)) {
     bool seenInstructionBlock = false;
-    bool seenMemoryBlock = false;
+    bool seenInitialMemory = false;
     bool seenInitialAccumulator = false;
     bool seenInitialConditional = false;
 
@@ -49,14 +47,14 @@ Program::Program(std::istream& input) : tokens_(input) {
             }
             instrs_ = std::move(parseInstructionBlock());
             seenInstructionBlock = true;
-        } else if (token.str == "(") {
-            if (seenMemoryBlock) {
-                std::cerr << "Parse error: more than one memory block at top-level scope "
+        } else if (token.isMemoryLiteral()) {
+            if (seenInitialMemory) {
+                std::cerr << "Parse error: more than one memory literal at top-level scope "
                              "(line " << tokens_.line() << ")" << std::endl;
                 isParseError_ = true;
             }
-            memory_.reset(parseMemory());
-            seenMemoryBlock = true;
+            memory_.reset(parseLiteralAsMemory());
+            seenInitialMemory = true;
         } else if (token.str == "a:") {
             if (seenInitialAccumulator) {
                 std::cerr << "Parse error: more than one initial accumulator value "
@@ -83,81 +81,6 @@ Program::Program(std::istream& input) : tokens_(input) {
 
     if (memory_) state_.memoryPtr = memory_->getChild();
     Arguments::Argument::setStatePtr(&state_);
-}
-
-MemoryCell* Program::parseMemory() {
-    // Rules for parsing memory:
-    // ensure that we're starting with a '(' token
-    // loop:
-    //   if we come across a '(' token, recurse (start a new memory cell)
-    //   if we come across a ')' token, return the memory cell we built
-    //   if we come across any other token, parse it as a literal
-    if (tokens_.next().str != "(") throw std::runtime_error("first token of memory block is not '('");
-
-    MemoryCell* thisCell = new MemoryCell();
-
-    for (Token token = tokens_.peek();
-         token.str != ")" && token.type != Token::END;
-         token = tokens_.peek()) {
-        MemoryCell* newCell = nullptr;
-        if (token.type == Token::GROUPING && token.str == "(") {
-            newCell = parseMemory();
-        } else if (token.isLiteral()) {
-            newCell = parseLiteral();
-        } else {
-            std::cerr << "Parse error: invalid memory token `" << token.str << "` "
-                         "(line " << tokens_.line() << ")\n"
-                         " -> Hint: only literal values may appear in a memory block" << std::endl;
-            isParseError_ = true;
-            tokens_.discard();
-        }
-        if (!newCell) continue;
-        thisCell->insertChild(newCell);
-    }
-    tokens_.discard();
-
-    if (tokens_.isEnd()) {
-        std::cerr << "Parse error: memory block is not closed\n"
-                     " -> Hint: did you forget a ')'?" << std::endl;
-        isParseError_ = true;
-    }
-
-    if (isParseError_) {
-        delete thisCell;
-        return nullptr;
-    } else {
-        return thisCell;
-    }
-}
-
-inline MemoryCell* Program::parseLiteral() {
-    Token token = tokens_.peek();
-    switch (token.type) {
-    case Token::NUMBER:
-        return new MemoryCell(parseNumber());
-    case Token::CHAR:
-        return new MemoryCell(parseChar());
-    case Token::STRING:
-        return parseString();
-    case Token::BOOL:
-        return new MemoryCell(parseBool());
-    default:
-        throw std::runtime_error("attempted to parse non-literal value");
-    }
-}
-
-num Program::parseNumericLiteral() {
-    Token token = tokens_.peek();
-    switch (token.type) {
-    case Token::NUMBER:
-        return parseNumber();
-    case Token::CHAR:
-        return parseChar();
-    case Token::BOOL:
-        return parseBool();
-    default:
-        throw std::runtime_error("attempted to parse non-numeric-literal value");
-    }
 }
 
 instr_ptr Program::parseInstructionBlock() {
@@ -203,34 +126,28 @@ inline instr_ptr Program::parseInstruction() {
     if (!code.isInstruction()) {
         std::cerr << "Parse error: invalid instruction code `" << code.str << "` "
                      "(line " << tokens_.line() << ")" << std::endl;
-        if (code.str == "(" || code.isLiteral() || code.isArgument())
+        if (code.isMemoryLiteral() || code.isArgument())
             std::cerr << " -> Hint: did you mean to use '.'?" << std::endl;
         isParseError_ = true;
         return instr_ptr();
     }
 
-    if (code.type == Token::MEMSET) return parseMemorySetter(code);
+    if (code.type == Token::SET_MEMORY) return parseMemorySetter(code);
     bool isUnary = tokens_.peek().isArgument();
     if (isUnary) return parseUnaryInstruction(code);
     return parseNullaryInstruction(code);
 }
 
 instr_ptr Program::parseMemorySetter(const Token& code) {
-    if (code.type != Token::MEMSET) throw std::runtime_error("code of memory setter is not of type Token::MEMSET");
+    if (code.type != Token::SET_MEMORY) throw std::runtime_error("code of memory setter is not of type Token::SET_MEMORY");
 
     Token value = tokens_.peek();
     if (value.isArgument()) {
         arg_ptr arg = parseArgument();
         Condition condition = parseCondition();
         return instr_ptr(new Instructions::SetMemoryVal(condition, arg));
-    } else if (value.type == Token::STRING) {
-        MemoryCell* cell = parseString();
-        Condition condition = parseCondition();
-        instr_ptr result (new Instructions::SetMemory(condition, std::move(*cell)));
-        delete cell; // TODO: this is kind of kludgy
-        return result;
-    } else if (value.str == "(") {
-        MemoryCell* cell = parseMemory();
+    } else if (value.isMemoryLiteral()) {
+        MemoryCell* cell = parseLiteralAsMemory();
         Condition condition = parseCondition();
         instr_ptr result (new Instructions::SetMemory(condition, std::move(*cell)));
         delete cell; // TODO: this is kind of kludgy
@@ -244,7 +161,7 @@ instr_ptr Program::parseMemorySetter(const Token& code) {
 }
 
 instr_ptr Program::parseNullaryInstruction(const Token& code) {
-    if (code.type != Token::INSTRUCTION) throw std::runtime_error("code of instruction is not of type Token::INSTRUCTION");
+    if (code.type != Token::KEYWORD) throw std::runtime_error("code of instruction is not of type Token::KEYWORD");
 
     Condition condition = parseCondition();
     instr_ptr instr;
@@ -291,12 +208,13 @@ instr_ptr Program::parseNullaryInstruction(const Token& code) {
     } else {
         std::cerr << "Parse error: unrecognized nullary instruction `" << code.str << "` "
                      "(line " << tokens_.line() << ")" << std::endl;
+        isParseError_ = true;
     }
     return instr;
 }
 
 instr_ptr Program::parseUnaryInstruction(const Token& code) {
-    if (code.type != Token::INSTRUCTION) throw std::runtime_error("code of instruction is not of type Token::INSTRUCTION");
+    if (code.type != Token::KEYWORD) throw std::runtime_error("code of instruction is not of type Token::KEYWORD");
 
     arg_ptr arg = parseArgument();
     if (!arg) return instr_ptr();
@@ -357,12 +275,12 @@ arg_ptr Program::parseArgument() {
     if (!arg.isArgument()) {
         std::cerr << "Parse error: invalid argument `" << arg.str << "` "
                      "(line " << tokens_.line() << ")" << std::endl;
-    } else if (arg.type == Token::NUMBER) {
-        result.reset(new Arguments::Constant(parseNumber()));
+    } else if (arg.type == Token::INTEGER) {
+        result.reset(new Arguments::Constant(parseIntegerLiteral()));
     } else if (arg.type == Token::CHAR) {
-        result.reset(new Arguments::Constant(parseChar()));
+        result.reset(new Arguments::Constant(parseCharLiteral()));
     } else if (arg.type == Token::BOOL) {
-        result.reset(new Arguments::Constant(parseBool()));
+        result.reset(new Arguments::Constant(parseBoolLiteral()));
     } else if (arg.type == Token::VARIABLE && arg.str == "a") {
         result.reset(new Arguments::Accumulator());
         tokens_.discard();
@@ -389,7 +307,77 @@ Condition Program::parseCondition() {
     }
 }
 
-num Program::parseNumber() {
+MemoryCell* Program::parseLiteralAsMemory() {
+    Token token = tokens_.peek();
+    if (!token.isMemoryLiteral()) throw std::runtime_error("attempted to parse non-literal value");
+    switch (token.type) {
+    case Token::INTEGER:
+        return new MemoryCell(parseIntegerLiteral());
+    case Token::CHAR:
+        return new MemoryCell(parseCharLiteral());
+    case Token::BOOL:
+        return new MemoryCell(parseBoolLiteral());
+    case Token::STRING:
+        return parseStringLiteral();
+    case Token::MEMORY_BLOCK:
+        return parseMemoryBlock();
+    default:
+        throw std::runtime_error("invalid token memory literal token type");
+    }
+}
+
+MemoryCell* Program::parseMemoryBlock() {
+    // Rules for parsing memory:
+    // ensure that we're starting with a '(' token
+    // loop:
+    //   if we come across a ')' token, return the memory cell we built
+    //   if we come across any other token, parse it as a literal
+    if (tokens_.next().str != "(") throw std::runtime_error("first token of memory block is not '('");
+
+    MemoryCell* result = new MemoryCell();
+
+    for (Token token = tokens_.peek();
+         token.str != ")" && token.type != Token::END;
+         token = tokens_.peek()) {
+        if (token.isMemoryLiteral()) {
+            MemoryCell* newCell = parseLiteralAsMemory();
+            result->insertChild(newCell);
+        } else {
+            std::cerr << "Parse error: invalid memory token `" << token.str << "` "
+                         "(line " << tokens_.line() << ")\n"
+                         " -> Hint: only literal values may appear in a memory block" << std::endl;
+            isParseError_ = true;
+            tokens_.discard();
+        }
+    }
+    tokens_.discard();
+
+    if (tokens_.isEnd()) {
+        std::cerr << "Parse error: memory block is not closed\n"
+                     " -> Hint: did you forget a ')'?" << std::endl;
+        isParseError_ = true;
+    }
+    // if we're not going to use thisCell, we may as well free its children now
+    if (isParseError_) result->reset();
+
+    return result;
+}
+
+num Program::parseLiteralAsNumber() {
+    Token token = tokens_.peek();
+    switch (token.type) {
+    case Token::INTEGER:
+        return parseIntegerLiteral();
+    case Token::CHAR:
+        return parseCharLiteral();
+    case Token::BOOL:
+        return parseBoolLiteral();
+    default:
+        throw std::runtime_error("attempted to parse non-numeric-literal value");
+    }
+}
+
+num Program::parseIntegerLiteral() {
     const Token token = tokens_.next();
     int base = 10;
     bool skipFirstTwo = false;
@@ -426,60 +414,93 @@ num Program::parseNumber() {
     return value;
 }
 
-num Program::parseChar() {
+num Program::parseCharLiteral() {
     const Token token = tokens_.next();
     if (token.type != Token::CHAR) throw std::runtime_error("token is not of type CHAR");
     if (token.str.back() != '\'') {
         isParseError_ = true;
         std::cerr << "Parse error: character literal `" << token.str << "` is not closed (line " << tokens_.line() << ")\n"
-                     " -> Hint: did you forget a `\'`?" << std::endl;
+                     " -> Hint: did you forget a `'`?" << std::endl;
         return 0;
     }
     if (token.str.size() < 3) {
         isParseError_ = true;
-        std::cerr << "Parse error: character literal is empty (line " << tokens_.line() << ")" << std::endl;
+        std::cerr << "Parse error: character literal `" << token.str << "`is empty (line " << tokens_.line() << ")" << std::endl;
         return 0;
     }
 
-    // first character is an apostrophe
-    const char* charStart = token.str.data() + 1;
-    if (*charStart != '\\') return static_cast<num>(*charStart);
-    return parseEscape(charStart);
+    // first and last characters are apostrophes
+    const char* const charBegin = token.str.data() + 1;
+    const char* const charEnd = token.str.data() + token.str.size() - 1;
+    const char* charPtr = charBegin;
+    char result = parseChar(charPtr);
+
+    if (charPtr != charEnd) {
+        isParseError_ = true;
+        std::cerr << "Parse error: character literal `" << token.str << "` contains more than one character "
+                     "(line " << tokens_.line() << ")" << std::endl;
+        return 0;
+    }
+
+    return static_cast<num>(result);
 }
 
-MemoryCell* Program::parseString() {
-    const Token token = tokens_.next();
-    if (token.type != Token::STRING) throw std::runtime_error("token is not of type STRING");
+MemoryCell* Program::parseStringLiteral() {
+    if (tokens_.peek().type != Token::STRING) throw std::runtime_error("token is not of type STRING (parseStringLiteral)");
 
-    MemoryCell* result = new MemoryCell();
+    std::stringstream str;
+    while (true) {
+        const Token token = tokens_.peek();
+        if (token.type != Token::STRING) {
+            isParseError_ = true;
+            std::cerr << "Parse error: expected a string literal, but instead got `" << token.str << "` "
+                         "(line " << tokens_.line() << ")\n";
+            if (token.isMemoryLiteral()) {
+                std::cerr << " -> Hint: `&` can only be used to concatenate string literals" << std::endl;
+            } else {
+                std::cerr << " -> Hint: did you use an unnecessary `&`?" << std::endl;
+            }
+            break;
+        }
+        tokens_.discard();
+
+        parseStringToken(str, token);
+        if (tokens_.peek().type == Token::CONCAT) {
+            tokens_.discard();
+        } else {
+            break;
+        }
+    }
+
+    return new MemoryCell(str.str());
+}
+
+inline void Program::parseStringToken(std::stringstream& str, const Token& token) {
+    if (token.type != Token::STRING) throw std::runtime_error("token is not of type STRING (parseStringToken)");
     if (token.str.back() != '\"') {
         isParseError_ = true;
         std::cerr << "Parse error: string literal `" << token.str << "` is not closed (line " << tokens_.line() << ")\n"
                      " -> Hint: did you forget a `\"`?" << std::endl;
-        return result;
+        return;
     }
     // first and last characters are quotation marks
     const char* const stringBegin = token.str.data() + 1;
     const char* const stringEnd = token.str.data() + token.str.size() - 1;
 
-    for (const char* stringPos = stringBegin; stringPos != stringEnd; stringPos++) {
-        num charValue = *stringPos == '\\' ? parseEscape(stringPos) : static_cast<num>(*stringPos);
-        result->insertChild(new MemoryCell(charValue));
+    for (const char* stringPos = stringBegin; stringPos != stringEnd;) {
+        str.put(parseChar(stringPos));
     }
-    return result;
 }
 
-inline bool Program::parseBool() {
-    const Token token = tokens_.next();
-    if (token.type != Token::BOOL) throw std::runtime_error("token is not of type BOOL");
-    if (token.str != "T" && token.str != "F") throw std::runtime_error("BOOL token is not 'T' or 'F'");
-    return token.str == "T";
-}
+char Program::parseChar(const char*& charPtr) {
+    char initialChar = *charPtr;
+    charPtr++;
 
-num Program::parseEscape(const char*& escape) {
-    if (*escape != '\\') throw std::runtime_error("escape does not start with `\\`");
-    escape++;
-    char escapeChar = *escape;
+    if (initialChar != '\\') return initialChar;
+    // else initialChar == '\\'
+
+    char escapeChar = *charPtr;
+    charPtr++;
 
     switch (escapeChar) {
     case '\\':
@@ -516,16 +537,19 @@ num Program::parseEscape(const char*& escape) {
         return '\v';
     case 'x': {
         num value = 0;
-        const char* const numBegin = escape + 1;
-        const char* const numEnd = escape + 3;
+        const char* const numBegin = charPtr;
+        const char* const numEnd = charPtr + 2;
         auto result = std::from_chars(numBegin, numEnd, value, 16);
         if (result.ptr != numEnd) {
             std::cerr << "Parse error: invalid character escape sequence `\\" << escapeChar << *numBegin << *(numBegin + 1) << "` "
                          "(line " << tokens_.line() << ")\n"
                          " -> Hint: ascii escape sequences must be of the form `\\xHH`, where H are hexadecimal digits" << std::endl;
             isParseError_ = true;
+        } else {
+            // Only increment the character pointer if the escape was valid. This prevents charPtr
+            // from going beyond the end of the string if the escape is malformed.
+            charPtr += 2;
         }
-        escape += 2;
         return value;
     }
     default:
@@ -536,13 +560,20 @@ num Program::parseEscape(const char*& escape) {
     }
 }
 
-inline num Program::parseInitialAccumulator() {
-    if (tokens_.next().str != "a:") throw std::runtime_error("first token of initial accumulator is not 'a:'");
-    return parseNumericLiteral();
+bool Program::parseBoolLiteral() {
+    const Token token = tokens_.next();
+    if (token.type != Token::BOOL) throw std::runtime_error("token is not of type BOOL");
+    if (token.str != "T" && token.str != "F") throw std::runtime_error("BOOL token is not 'T' or 'F'");
+    return token.str == "T";
 }
 
-inline num Program::parseInitialConditional() {
+num Program::parseInitialAccumulator() {
+    if (tokens_.next().str != "a:") throw std::runtime_error("first token of initial accumulator is not 'a:'");
+    return parseLiteralAsNumber();
+}
+
+num Program::parseInitialConditional() {
     if (tokens_.next().str != "c:") throw std::runtime_error("first token of initial accumulator is not 'c:'");
-    return parseNumericLiteral();
+    return parseLiteralAsNumber();
 }
 

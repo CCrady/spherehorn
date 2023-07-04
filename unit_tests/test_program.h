@@ -14,7 +14,7 @@ void testProgram() {
 
     name = "Repeat running";
     stringstream str1 ("{break} (0)");
-    Program prog1 (str1);
+    Program prog1 (std::move(str1));
     assert(prog1.run(), == Status::EXIT);
     bool isException = false;
     try {
@@ -31,7 +31,7 @@ void testProgram() {
         toCin.str("");
         fromCout.str("");
         const char* helloWorldOutput = "Hello, World!\n";
-        Program helloWorldProg (helloWorldInput);
+        Program helloWorldProg (std::move(helloWorldInput));
         helloWorldInput.close();
         assert(helloWorldProg.isParseError(), == false);
         assert(helloWorldProg.run(), == Status::EXIT);
@@ -47,7 +47,7 @@ void testProgram() {
         toCin.str("3\n4\n15\n");
         fromCout.str("");
         const char* fizzbuzzOutput = "1\n2\nfizz\nbuzz\n5\nfizz\n7\nbuzz\nfizz\n10\n11\nfizzbuzz\n13\n14\nfizz\n";
-        Program fizzbuzzProg (fizzbuzzInput);
+        Program fizzbuzzProg (std::move(fizzbuzzInput));
         fizzbuzzInput.close();
         assert(fizzbuzzProg.isParseError(), == false);
         assert(fizzbuzzProg.run(), == Status::EXIT);

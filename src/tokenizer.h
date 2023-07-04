@@ -13,35 +13,37 @@ namespace spherehorn {
 // - any continuous run of non-whitespace, non-special characters that's not a string or character literal
 // - any string or character literal
 // - any special character that's not part of a string or character literal
-// special characters are '{', '}', '(', ')', ';', '?', '!'
+// special characters are '{', '}', '(', ')', ';', '?', '!', '.', '&'
 // comments are started with a '#' character which isn't part of a string or character literal
 struct Token {
     enum TokenType {
-        INSTRUCTION,
-        MEMSET,
+        KEYWORD,
+        SET_MEMORY,
         VARIABLE,
         TERMINATOR,
-        GROUPING,
+        CODE_BLOCK,
+        MEMORY_BLOCK,
         STRING,
         CHAR,
-        NUMBER,
+        INTEGER,
         BOOL,
+        CONCAT,
         END,
     };
     TokenType type;
     std::string str;
     Token(TokenType _type = END, std::string _str = ""): type(_type), str(_str) {}
     constexpr bool isNumericLiteral() const {
-        return type == CHAR || type == NUMBER || type == BOOL;
+        return type == CHAR || type == INTEGER || type == BOOL;
     }
     constexpr bool isArgument() const {
         return type == VARIABLE || isNumericLiteral();
     }
-    constexpr bool isLiteral() const {
-        return type == STRING || isNumericLiteral();
+    constexpr bool isMemoryLiteral() const {
+        return type == STRING || (type == MEMORY_BLOCK && str == "(") || isNumericLiteral();
     }
     constexpr bool isInstruction() const {
-        return type == INSTRUCTION || type == MEMSET;
+        return type == KEYWORD || type == SET_MEMORY;
     }
 };
 

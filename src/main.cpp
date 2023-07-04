@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <utility>
 #include "program.h"
 
 const int EX_USAGE = 64;
@@ -19,7 +20,7 @@ int main(int argc, char** argv) {
         return EX_NOINPUT;
     }
 
-    spherehorn::Program program (input);
+    spherehorn::Program program (std::move(input));
     input.close(); // we can close the file as soon as we're done parsing it
     if (program.isParseError()) {
         std::cerr << "Program was not run, as there were one or more parse errors." << std::endl;

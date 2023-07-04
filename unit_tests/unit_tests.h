@@ -188,15 +188,17 @@ std::ostream& operator <<(std::ostream& out, spherehorn::Status status) {
 
 std::ostream& operator <<(std::ostream& out, spherehorn::Token::TokenType type) {
     switch (type) {
-        printEnumCase(Token::INSTRUCTION);
-        printEnumCase(Token::MEMSET);
+        printEnumCase(Token::KEYWORD);
+        printEnumCase(Token::SET_MEMORY);
         printEnumCase(Token::VARIABLE);
         printEnumCase(Token::TERMINATOR);
-        printEnumCase(Token::GROUPING);
-        printEnumCase(Token::NUMBER);
-        printEnumCase(Token::STRING);
+        printEnumCase(Token::CODE_BLOCK);
+        printEnumCase(Token::MEMORY_BLOCK);
+        printEnumCase(Token::INTEGER);
         printEnumCase(Token::CHAR);
         printEnumCase(Token::BOOL);
+        printEnumCase(Token::STRING);
+        printEnumCase(Token::CONCAT);
         printEnumCase(Token::END);
     }
     return out;

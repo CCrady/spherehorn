@@ -13,51 +13,57 @@ void testTokenizer() {
 
     name = "Basic token categories";
     std::stringstream str1 (
-        "as bc **ASDF " // instruction
+        "as bc **ASDF " // keyword
         ". " // memory setter
         "a m " // variable
-        "2 0b101 0o7 0d96 0xdeadbeef " // number
+        "2 0b101 0o7 0d96 0xdeadbeef " // integer
+        "T F" // boolean
         "( { ) } " // grouping
         "; ? ! " // terminator
         "'d' '\\n' '\\'' '\"' ' ' " // character
         "\"\" \"hi there!!\" \"f\" " // string
     );
     Tokenizer tokens1 (str1);
-    // instructions
+    // keywords
     token = tokens1.next();
-    assertTokenEq(INSTRUCTION, "as");
+    assertTokenEq(KEYWORD, "as");
     token = tokens1.next();
-    assertTokenEq(INSTRUCTION, "bc");
+    assertTokenEq(KEYWORD, "bc");
     token = tokens1.next();
-    assertTokenEq(INSTRUCTION, "**ASDF");
+    assertTokenEq(KEYWORD, "**ASDF");
     // memory setter
     token = tokens1.next();
-    assertTokenEq(MEMSET, ".");
+    assertTokenEq(SET_MEMORY, ".");
     // variables
     token = tokens1.next();
     assertTokenEq(VARIABLE, "a");
     token = tokens1.next();
     assertTokenEq(VARIABLE, "m");
-    // numbers
+    // integers
     token = tokens1.next();
-    assertTokenEq(NUMBER, "2");
+    assertTokenEq(INTEGER, "2");
     token = tokens1.next();
-    assertTokenEq(NUMBER, "0b101");
+    assertTokenEq(INTEGER, "0b101");
     token = tokens1.next();
-    assertTokenEq(NUMBER, "0o7");
+    assertTokenEq(INTEGER, "0o7");
     token = tokens1.next();
-    assertTokenEq(NUMBER, "0d96");
+    assertTokenEq(INTEGER, "0d96");
     token = tokens1.next();
-    assertTokenEq(NUMBER, "0xdeadbeef");
+    assertTokenEq(INTEGER, "0xdeadbeef");
+    // booleans
+    token = tokens1.next();
+    assertTokenEq(BOOL, "T");
+    token = tokens1.next();
+    assertTokenEq(BOOL, "F");
     // grouping
     token = tokens1.next();
-    assertTokenEq(GROUPING, "(");
+    assertTokenEq(MEMORY_BLOCK, "(");
     token = tokens1.next();
-    assertTokenEq(GROUPING, "{");
+    assertTokenEq(CODE_BLOCK, "{");
     token = tokens1.next();
-    assertTokenEq(GROUPING, ")");
+    assertTokenEq(MEMORY_BLOCK, ")");
     token = tokens1.next();
-    assertTokenEq(GROUPING, "}");
+    assertTokenEq(CODE_BLOCK, "}");
     // terminators
     token = tokens1.next();
     assertTokenEq(TERMINATOR, ";");
@@ -104,16 +110,16 @@ void testTokenizer() {
     Tokenizer tokens2 (str2);
     assert(tokens2.line(), == 1);
     token = tokens2.next();
-    assertTokenEq(INSTRUCTION, "A");
+    assertTokenEq(KEYWORD, "A");
     assert(tokens2.line(), == 2);
     token = tokens2.next();
-    assertTokenEq(INSTRUCTION, "B");
+    assertTokenEq(KEYWORD, "B");
     assert(tokens2.line(), == 3);
     token = tokens2.next();
-    assertTokenEq(INSTRUCTION, "C");
+    assertTokenEq(KEYWORD, "C");
     assert(tokens2.line(), == 6);
     token = tokens2.next();
-    assertTokenEq(INSTRUCTION, "D");
+    assertTokenEq(KEYWORD, "D");
     assert(tokens2.line(), == 6);
     token = tokens2.next();
     assertTokenEq(CHAR, "'\\n'");
@@ -125,7 +131,7 @@ void testTokenizer() {
     assertTokenEq(STRING, "\" str #\"");
     assert(tokens2.line(), == 9);
     token = tokens2.next();
-    assertTokenEq(INSTRUCTION, "E");
+    assertTokenEq(KEYWORD, "E");
     assert(tokens2.line(), == 9);
     token = tokens2.next();
     assertTokenEq(CHAR, "'#'");
@@ -134,13 +140,13 @@ void testTokenizer() {
     assertTokenEq(TERMINATOR, ";");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
-    assertTokenEq(MEMSET, ".");
+    assertTokenEq(SET_MEMORY, ".");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
-    assertTokenEq(GROUPING, "}");
+    assertTokenEq(CODE_BLOCK, "}");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
-    assertTokenEq(GROUPING, "(");
+    assertTokenEq(MEMORY_BLOCK, "(");
     assert(tokens2.line(), == 10);
     token = tokens2.next();
     assertTokenEq(TERMINATOR, "?");
@@ -154,23 +160,23 @@ void testTokenizer() {
     );
     Tokenizer tokens3 (str3);
     token = tokens3.peek();
-    assertTokenEq(INSTRUCTION, "A");
+    assertTokenEq(KEYWORD, "A");
     token = tokens3.peek();
-    assertTokenEq(INSTRUCTION, "A");
+    assertTokenEq(KEYWORD, "A");
     token = tokens3.next();
-    assertTokenEq(INSTRUCTION, "A");
+    assertTokenEq(KEYWORD, "A");
     token = tokens3.peek();
-    assertTokenEq(INSTRUCTION, "B");
+    assertTokenEq(KEYWORD, "B");
     token = tokens3.next();
-    assertTokenEq(INSTRUCTION, "B");
+    assertTokenEq(KEYWORD, "B");
     token = tokens3.peek();
     assertTokenEq(TERMINATOR, ";");
     token = tokens3.next();
     assertTokenEq(TERMINATOR, ";");
     token = tokens3.peek();
-    assertTokenEq(INSTRUCTION, "C");
+    assertTokenEq(KEYWORD, "C");
     token = tokens3.next();
-    assertTokenEq(INSTRUCTION, "C");
+    assertTokenEq(KEYWORD, "C");
     token = tokens3.peek();
     assertTokenEq(TERMINATOR, ";");
     token = tokens3.next();
@@ -188,10 +194,10 @@ void testTokenizer() {
     );
     Tokenizer tokens4 (str4);
     token = tokens4.peek();
-    assertTokenEq(INSTRUCTION, "A");
+    assertTokenEq(KEYWORD, "A");
     tokens4.discard();
     token = tokens4.peek();
-    assertTokenEq(INSTRUCTION, "B");
+    assertTokenEq(KEYWORD, "B");
     tokens4.discard();
     bool threwException = false;
     try {
@@ -201,7 +207,7 @@ void testTokenizer() {
     }
     assert(threwException,);
     token = tokens4.next();
-    assertTokenEq(INSTRUCTION, "C");
+    assertTokenEq(KEYWORD, "C");
     threwException = false;
     try {
         tokens4.discard();

@@ -10,8 +10,12 @@ using namespace spherehorn;
 
 
 namespace {
-    constexpr bool isGrouping(char ch) {
-        return ch == '{' || ch == '}' || ch == '(' || ch == ')';
+    constexpr bool isCodeBlock(char ch) {
+        return ch == '{' || ch == '}';
+    }
+
+    constexpr bool isMemoryBlock(char ch) {
+        return ch == '(' || ch == ')';
     }
 
     constexpr bool isInstructionTerminator(char ch) {
@@ -19,7 +23,7 @@ namespace {
     }
 
     constexpr bool isWordTerminator(char ch) {
-        return isspace(ch) || isGrouping(ch) || isInstructionTerminator(ch) || ch == '#';
+        return isspace(ch) || isCodeBlock(ch) || isMemoryBlock(ch) || isInstructionTerminator(ch) || ch == '&' || ch == '#';
     }
 
     constexpr bool isStringTerminator(char ch) {
@@ -57,14 +61,14 @@ void Tokenizer::discard() {
 
 // how to determine the token's type:
 // first character:
-//   case ;, ?, !, {, }, (, ): special type corresponding to the particular character
-//   case digit: number literal
+//   case ;, ?, !, {, }, (, ), &: special type corresponding to the particular character
+//   case digit: integer literal
 //   case ': char literal
 //   case ": string literal
 //   case .: memory setter
 //   case a, m, and next character is a word terminator: variable
 //   case T, F, and next character is a word terminator: bool
-//   else: instruction
+//   else: keyword
 // TODO: refactor this to be less spaghetti
 void Tokenizer::setUpcoming() {
     // if we've already set upcoming_ to the right value, we don't need to do anything
@@ -80,13 +84,17 @@ void Tokenizer::setUpcoming() {
     if (isEnd()) {
         upcoming_.type = Token::END;
     } else if (ch == '.') {
-        upcoming_.type = Token::MEMSET;
+        upcoming_.type = Token::SET_MEMORY;
+    } else if (ch == '&') {
+        upcoming_.type = Token::CONCAT;
     } else if (isInstructionTerminator(ch)) {
         upcoming_.type = Token::TERMINATOR;
-    } else if (isGrouping(ch)) {
-        upcoming_.type = Token::GROUPING;
+    } else if (isCodeBlock(ch)) {
+        upcoming_.type = Token::CODE_BLOCK;
+    } else if (isMemoryBlock(ch)) {
+        upcoming_.type = Token::MEMORY_BLOCK;
     } else if (isdigit(ch)) {
-        upcoming_.type = Token::NUMBER;
+        upcoming_.type = Token::INTEGER;
     } else if (ch == '\'') {
         upcoming_.type = Token::CHAR;
     } else if (ch == '\"') {
@@ -96,50 +104,52 @@ void Tokenizer::setUpcoming() {
     } else if (isBoolCh(ch) && isWordTerminator(input_.peek())) {
         upcoming_.type = Token::BOOL;
     } else {
-        upcoming_.type = Token::INSTRUCTION;
+        upcoming_.type = Token::KEYWORD;
     }
 
     // based on the token type we figured out, find the token string
     str_.str("");
     switch (upcoming_.type) {
-        case Token::MEMSET:
-        case Token::TERMINATOR:
-        case Token::GROUPING:
-        case Token::VARIABLE:
-        case Token::BOOL:
+    case Token::SET_MEMORY:
+    case Token::CONCAT:
+    case Token::TERMINATOR:
+    case Token::CODE_BLOCK:
+    case Token::MEMORY_BLOCK:
+    case Token::VARIABLE:
+    case Token::BOOL:
+        str_.put(ch);
+        break;
+    case Token::INTEGER:
+    case Token::KEYWORD:
+        str_.put(ch);
+        while (!isEnd() && !isWordTerminator(input_.peek())) {
+            str_.put(getCh());
+        }
+        break;
+    case Token::CHAR:
+        str_.put(ch);
+        do {
+            ch = getCh();
             str_.put(ch);
-            break;
-        case Token::NUMBER:
-        case Token::INSTRUCTION:
-            str_.put(ch);
-            while (!isEnd() && !isWordTerminator(input_.peek())) {
+            // if we come across a backslash, we want to put the following character in even if it's an apostrophe
+            if (ch == '\\') {
                 str_.put(getCh());
             }
-            break;
-        case Token::CHAR:
+        } while (!isCharTerminator(ch) && !isEnd());
+        break;
+    case Token::STRING:
+        str_.put(ch);
+        do {
+            ch = getCh();
             str_.put(ch);
-            do {
-                ch = getCh();
-                str_.put(ch);
-                // if we come across a backslash, we want to put the following character in even if it's an apostrophe
-                if (ch == '\\') {
-                    str_.put(getCh());
-                }
-            } while (!isCharTerminator(ch) && !isEnd());
-            break;
-        case Token::STRING:
-            str_.put(ch);
-            do {
-                ch = getCh();
-                str_.put(ch);
-                // if we come across a backslash, we want to put the following character in even if it's a quote mark
-                if (ch == '\\') {
-                    str_.put(getCh());
-                }
-            } while (!isStringTerminator(ch) && !isEnd());
-            break;
-        case Token::END:
-            break;
+            // if we come across a backslash, we want to put the following character in even if it's a quote mark
+            if (ch == '\\') {
+                str_.put(getCh());
+            }
+        } while (!isStringTerminator(ch) && !isEnd());
+        break;
+    case Token::END:
+        break;
     }
     upcoming_.str = str_.str();
 
